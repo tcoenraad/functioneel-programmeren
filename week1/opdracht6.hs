@@ -30,3 +30,9 @@ mymaximum [n] = n
 mymaximum [] = error "undefined"
 mymaximum (x:xs) | x > mymaximum xs = x
                  | otherwise = mymaximum xs
+
+myzip :: [n] -> [n] -> [(n, n)]
+myzip [] [] = []
+myzip [] [n] = []
+myzip [n] [] = []
+myzip (x:xs) (y:ys) = [(x,y)] ++ myzip xs ys
