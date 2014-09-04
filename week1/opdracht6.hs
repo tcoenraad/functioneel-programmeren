@@ -20,3 +20,7 @@ mytake n (x:xs) = [x] ++ mytake (n-1) xs
 myelem :: (Eq n) => n -> [n] -> Bool
 myelem n [] = False
 myelem n (x:xs) = (x == n) || (myelem n xs)
+
+myconcat :: [[n]] -> [n]
+myconcat [] = []
+myconcat (x:xs) = x ++ myconcat xs
