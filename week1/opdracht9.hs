@@ -9,7 +9,7 @@ sumRows [] = []
 sumRows (x:xs) = [sum x] ++ sumRows xs
 
 transpose :: [[n]] -> [[n]]
---transpose [[]] = []
+transpose ([]:_) = []
 transpose x = [map head x] ++ transpose (map tail x)
 
 sumColumns :: [[Number]] -> [Number]
