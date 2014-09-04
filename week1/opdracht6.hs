@@ -16,3 +16,7 @@ mytake :: Number -> [n] -> [n]
 mytake 0 (x:xs) = []
 mytake n [] = []
 mytake n (x:xs) = [x] ++ mytake (n-1) xs
+
+myelem :: (Eq n) => n -> [n] -> Bool
+myelem n [] = False
+myelem n (x:xs) = (x == n) || (myelem n xs)
