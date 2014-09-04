@@ -24,3 +24,9 @@ myelem n (x:xs) = (x == n) || (myelem n xs)
 myconcat :: [[n]] -> [n]
 myconcat [] = []
 myconcat (x:xs) = x ++ myconcat xs
+
+mymaximum :: [Number] -> Number
+mymaximum [n] = n
+mymaximum [] = error "undefined"
+mymaximum (x:xs) | x > mymaximum xs = x
+                 | otherwise = mymaximum xs
