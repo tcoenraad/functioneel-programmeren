@@ -2,7 +2,7 @@ import FPPrac
 
 myfilter :: (a -> Bool) -> [a] -> [a]
 myfilter f [] = []
-myfilter f (x:xs) | f x = [x] ++ myfilter f xs
+myfilter f (x:xs) | f x = x : myfilter f xs
                   | otherwise = myfilter f xs
 
 myfoldl :: (b -> a -> b) -> b -> [a] -> b
@@ -18,4 +18,4 @@ myfoldr f s x = myfoldr f a b
 
 myzipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
 myzipWith f [] [] = []
-myzipWith f (x:xs) (y:ys) = [f x y] ++ myzipWith f xs ys
+myzipWith f (x:xs) (y:ys) = f x y : myzipWith f xs ys
