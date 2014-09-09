@@ -1,16 +1,23 @@
 import FPPrac
-import Data.List
-import Data.Char
 
 a = [2..40]
 alleNatuurlijkeGetallen = [2..]
 
 zeef :: [Number] -> [Number]
 zeef [] = []
-zeef (x:xs) = x : zeef (filter (\n ->n`mod`x/=0) xs)
+zeef (x:xs) = x : zeef (filter (\n ->n `mod` x /= 0) xs)
 
+isPriem :: Number -> Bool
+isPriem n = n == last (zeef [2..n])
 
+eersteNPriems :: Number -> [Number]
+eersteNPriems n = take n (zeef [2..])
 
--- [2..40] -> [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+eerstePriemsTotN :: Number -> [Number]
+eerstePriemsTotN n = zeef [2..n]
 
+delers :: Number -> [Number]
+delers n = filter (\x -> n `mod` x == 0) [1..n]
 
+isPriem2 :: Number -> Bool
+isPriem2 n = length (delers n) == 2
