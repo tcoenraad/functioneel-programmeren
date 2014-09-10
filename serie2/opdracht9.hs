@@ -2,5 +2,9 @@ import FPPrac
 import Data.List
 
 isort :: [Number] -> [Number]
-isort [n] = [n]
-isort xs = minimum(xs) : isort (delete(minimum xs) xs)
+isort x = foldl (insert1) [] x 
+
+insert1 :: [Number] -> Number -> [Number]
+insert1 [] a = [a]
+insert1 (x:xs) a | a<=x = a : (x:xs)
+                 | otherwise = x: insert1 xs a
