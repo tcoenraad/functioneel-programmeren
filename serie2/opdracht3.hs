@@ -1,8 +1,5 @@
 import FPPrac
 
-a = [2..40]
-alleNatuurlijkeGetallen = [2..]
-
 zeef :: [Number] -> [Number]
 zeef [] = []
 zeef (x:xs) = x : zeef (filter (\n ->n `mod` x /= 0) xs)
