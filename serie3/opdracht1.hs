@@ -21,7 +21,7 @@ pp1c :: Tree1c -> RoseTree
 pp1c (Node1c i t1 t2) = RoseNode (show i) [(pp1c t1), (pp1c t2)]
 pp1c Leaf1c = RoseNode "" []
 
-data Tree1d = Leaf1d Number | Node1d [Tree1d]
+data Tree1d = Leaf1d (Number, Number) | Node1d [Tree1d]
 
 pp1d :: Tree1d -> RoseTree
 pp1d (Node1d trees) = RoseNode "" (map pp1d trees)
