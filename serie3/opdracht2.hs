@@ -16,8 +16,8 @@ kwadraat (Node1a i t1 t2) = Node1a (i^2) (kwadraat t1) (kwadraat t2)
 kwadraat (Leaf1a i) = (Leaf1a (i^2))
 
 mapTree :: (Number -> Number) -> Tree1a -> Tree1a
-mapTree x (Node1a i t1 t2) = Node1a (x i) (mapTree x t1) (mapTree x t2)
-mapTree x (Leaf1a i) = (Leaf1a (x i))
+mapTree f (Node1a i t1 t2) = Node1a (f i) (mapTree f t1) (mapTree f t2)
+mapTree f (Leaf1a i) = (Leaf1a (f i))
 
 --showTree(pp1a(mapTree (^2) (Node1a 1 (Leaf1a 35) (Leaf1a 36))))
 
@@ -38,5 +38,4 @@ mapTree1b x (Node1b (i,j) t1 t2) = Node1a (x (i, j)) (mapTree1b x t1) (mapTree1b
 mapTree1b x (Leaf1b (i,j)) = (Leaf1a (x (i, j)))
 
 --showTree(pp1a(mapTree1b (\(x,y) -> x *y) (Node1b (1,2) (Leaf1b (3,5)) (Leaf1b (3,6)))))
-
 --exampleTree2a = showTree(mapTree((+2) (Node1a 1 (Leaf1a 35) (Leaf1a 36))))
