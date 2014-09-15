@@ -16,3 +16,11 @@ vervang p n (Node1a i t1 t2) | p == "" = Node1a n t1 t2
 vervang p n (Leaf1a i) = Leaf1a i
 
 --showTree(pp1a(vervang "l" 2 (Node1a 1 (Node1a 5 (Leaf1a 8) (Leaf1a 3)) (Leaf1a 3))))
+
+subboom :: String -> Tree1a -> Tree1a
+subboom p (Node1a i t1 t2) | p == "" = Node1a i t1 t2
+                           | (head p) == 'l' && (length p) >0 = subboom (tail p) t1
+                           | (head p) == 'r' && (length p) >0 = subboom (tail p) t2
+subboom p (Leaf1a i) = error "lengte pad groter dan boom"
+
+--showTree(pp1a(subboom "lrl" (Node1a 1 (Node1a 5 (Leaf1a 8) (Leaf1a 3)) (Leaf1a 3))))
