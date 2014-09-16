@@ -44,3 +44,14 @@ vervangblad p n (Leaf1a i) | p == "" = Leaf1a n
                     
 --showTree(pp1a(linkerboom "lr" (Node1a 1 (Node1a 2 (Leaf1a 4) (Leaf1a 5)) (Node1a 3 (Leaf1a 6) (Leaf1a 7)))))
 --showTree(pp1a(Node1a 1 (Node1a 2 (Leaf1a 4) (Leaf1a 5)) (Node1a 3 (Leaf1a 6) (Leaf1a 7))))
+
+rechterboom :: String -> Tree1a -> Tree1a
+rechterboom p (Node1a i t1 t2) | elem 'l' p == False = error "gegeven blad heeft geen linkerbuur"
+                              | otherwise = vervangblad (reverse (rechterboom' (reverse p))) (-1) (Node1a i t1 t2)
+
+rechterboom' :: String -> String
+rechterboom' [] = []
+rechterboom' p | head p == 'r' = "l" ++ rechterboom' (tail p) 
+              | otherwise = "r" ++ tail p
+
+--showTree(pp1a(rechterboom "lr" (Node1a 1 (Node1a 2 (Leaf1a 4) (Leaf1a 5)) (Node1a 3 (Leaf1a 6) (Leaf1a 7)))))
