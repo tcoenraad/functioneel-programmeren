@@ -19,8 +19,8 @@ vervang p n (Leaf1a i) = Leaf1a i
 
 subboom :: String -> Tree1a -> Tree1a
 subboom p (Node1a i t1 t2) | p == "" = Node1a i t1 t2
-                           | (head p) == 'l' && (length p) > 0 = subboom (tail p) t1
-                           | (head p) == 'r' && (length p) > 0 = subboom (tail p) t2
+                           | (head p) == 'l' = subboom (tail p) t1
+                           | (head p) == 'r' = subboom (tail p) t2
 subboom p (Leaf1a i) | p == "" = Leaf1a i
                      | otherwise = error "lengte pad groter dan boom"
 
@@ -36,7 +36,7 @@ linkerboom' p | head p == 'l' = "r" ++ linkerboom' (tail p)
               | otherwise = "l" ++ tail p
 
 vervangblad :: String -> Number -> Tree1a -> Tree1a
-vervangblad p n (Node1a i t1 t2) | p == "" = error "gegeven blad bestaat niet"
+vervangblad p n (Node1a i t1 t2) | p == "" = vervang p n (Node1a i t1 t2)
                                  | (head p) == 'l' = Node1a i (vervangblad (tail p) n t1) t2
                                  | otherwise = Node1a i t1 (vervangblad (tail p) n t2)                            
 vervangblad p n (Leaf1a i) | p == "" = Leaf1a n
@@ -46,12 +46,12 @@ vervangblad p n (Leaf1a i) | p == "" = Leaf1a n
 --showTree(pp1a(Node1a 1 (Node1a 2 (Leaf1a 4) (Leaf1a 5)) (Node1a 3 (Leaf1a 6) (Leaf1a 7))))
 
 rechterboom :: String -> Tree1a -> Tree1a
-rechterboom p (Node1a i t1 t2) | elem 'l' p == False = error "gegeven blad heeft geen linkerbuur"
+rechterboom p (Node1a i t1 t2) | elem 'l' p == False = error "gegeven blad heeft geen rechterbuur"
                               | otherwise = vervangblad (reverse (rechterboom' (reverse p))) (-1) (Node1a i t1 t2)
 
 rechterboom' :: String -> String
 rechterboom' [] = []
 rechterboom' p | head p == 'r' = "l" ++ rechterboom' (tail p) 
-              | otherwise = "r" ++ tail p
+               | otherwise = "r" ++ tail p
 
 --showTree(pp1a(rechterboom "lr" (Node1a 1 (Node1a 2 (Leaf1a 4) (Leaf1a 5)) (Node1a 3 (Leaf1a 6) (Leaf1a 7)))))
