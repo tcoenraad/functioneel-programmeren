@@ -3,6 +3,10 @@ import FPPrac.Trees.ParseTree
 import Data.Char
 import Data.Either
 
+pp :: (Show a, Show b) => BinTree a b -> ParseTree
+pp (Node a t1 t2) = ParseNode (show a) [(pp t1), (pp t2)]
+pp (Leaf b) = ParseNode (show b) []
+
 data BinTree a b = Leaf b | Node a (BinTree a b) (BinTree a b) deriving Show
 
 data ADT = LP | RP | OP String | NUM Number | VAR String deriving Show
@@ -48,3 +52,12 @@ parse O (x:xs) = error "Wee!"
 consume :: [ADT] -> [ADT]
 consume (RP:xs) = xs
 consume [] = error "Missing parenthesis"
+
+eval :: (BinTree String (Either String Number)) -> Number
+eval (Node "+" t1 t2) = (eval t1) + (eval t2)
+eval (Node "-" t1 t2) = (eval t1) - (eval t2)
+eval (Node "*" t1 t2) = (eval t1) * (eval t2)
+eval (Node "/" t1 t2) = (eval t1) / (eval t2)
+eval (Node "^" t1 t2) = (eval t1) ^ (eval t2)
+eval (Leaf l) = n where
+  (Right n) = l
