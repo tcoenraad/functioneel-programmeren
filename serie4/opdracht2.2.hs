@@ -9,7 +9,7 @@ data S = E | O
 
 parse :: S -> String -> (BinTree String (Either String Number), String)
 parse E (x:xs) | x == '(' && head r3 == ')' = (Node op t1 t3, r4)
-               | isDigit x = (Leaf (Right(read [x] :: Number)), xs)
+               | isDigit x = (Leaf (Right(read [x])), xs)
                | isLetter x = (Leaf (Left [x]), xs)
                | otherwise = error "Waa!"
         where 
