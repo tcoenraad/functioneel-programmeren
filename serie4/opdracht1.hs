@@ -16,13 +16,15 @@ type Tree1b = BinTree (Number, Number) (Number, Number)
 
 type Tree1c = BinTree Number Unit
 
-data Unit = U
+data Unit = U | T
 
 instance Show Unit where
   show U = ""
+  show T = "."
+
 
 pp :: (Show a, Show b) => BinTree a b -> ParseTree
 pp (Node a t1 t2) = ParseNode (show a) [(pp t1), (pp t2)]
 pp (Leaf b) = ParseNode (show b) []
 
---showTree(pp(Node 1 (Leaf 2) (Leaf 3))) 
+--showTree(pp(Node 1 (Leaf 2) (Leaf 3)))
