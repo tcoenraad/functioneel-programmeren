@@ -53,11 +53,14 @@ consume :: [ADT] -> [ADT]
 consume (RP:xs) = xs
 consume [] = error "Missing parenthesis"
 
-eval :: (BinTree String (Either String Number)) -> Number
-eval (Node "+" t1 t2) = (eval t1) + (eval t2)
-eval (Node "-" t1 t2) = (eval t1) - (eval t2)
-eval (Node "*" t1 t2) = (eval t1) * (eval t2)
-eval (Node "/" t1 t2) = (eval t1) / (eval t2)
-eval (Node "^" t1 t2) = (eval t1) ^ (eval t2)
-eval (Leaf l) = n where
-  (Right n) = l
+eval :: (String -> Number) -> (BinTree String (Either String Number)) -> Number
+eval f (Node "+" t1 t2) = (eval f t1) + (eval f t2)
+eval f (Node "-" t1 t2) = (eval f t1) - (eval f t2)
+eval f (Node "*" t1 t2) = (eval f t1) * (eval f t2)
+eval f (Node "/" t1 t2) = (eval f t1) / (eval f t2)
+eval f (Node "^" t1 t2) = (eval f t1) ^ (eval f t2)
+eval f (Leaf (Right n)) = n
+eval f (Leaf (Left n)) = f n
+
+assign :: String -> Number
+assign "abc" = 2
