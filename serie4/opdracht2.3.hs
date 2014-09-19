@@ -25,8 +25,10 @@ getNumber x = (takeWhile isDigit x, dropWhile isDigit x)
 getWord :: String -> (String, String)
 getWord x = (takeWhile isAlpha x, dropWhile isAlpha x)
 
-parseString :: String -> (BinTree String (Either String Number), String)
-parseString x = tokenizer $ parse
+parseString :: String -> (BinTree String (Either String Number))
+parseString x | length r == 0 = p
+              | otherwise = error "Too long string"
+              where (p, r) = parse E (tokenizer x)
 
 data S = E | O
 
@@ -36,10 +38,13 @@ parse E (LP:xs) = (Node op t1 t3, r4)
                 (t1,r1) = parse E xs
                 ((Node op _ _), r2) = parse O r1
                 (t3,r3) = parse E r2
-                (_:r4) = r3
-
+                r4 = consume r3
 parse E ((NUM x):xs) = (Leaf (Right x), xs)
 parse E ((VAR x):xs) = (Leaf (Left x), xs)
 parse E (x:xs) = error "Waa!"
 parse O ((OP x):xs) = (Node x (Leaf (Right 1)) (Leaf (Right 2)), xs)
 parse O (x:xs) = error "Wee!"
+
+consume :: [ADT] -> [ADT]
+consume (RP:xs) = xs
+consume [] = error "Missing parenthesis"
