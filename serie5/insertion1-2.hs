@@ -53,10 +53,22 @@ colourFlip t@(Tree Black (Node n (Tree Red (Node n1 t4 t5)) (Tree Red (Node n2 t
 --    )
 --  )
 
-rebalance1 :: RBTree -> RBTree
-rebalance1 t@(Tree c1 (Node n (Tree c2 (Node n1 (Tree c3 (Node n2 t4 t5)) t6)) t7))
+rebalance :: RBTree -> RBTree
+rebalance t@(Tree c1 (Node n (Tree c2 (Node n1 (Tree c3 (Node n2 t4 t5)) t6)) t7))
   | c1==Black && c2==Red && c3 == Red = Tree Black (Node n1 (Tree Red (Node n2 t4 t5)) (Tree Red (Node n t6 t7)))
   | otherwise = t
-
+rebalance t1@(Tree c1 (Node n (Tree c2 (Node n1 t4 (Tree c3 (Node n2 t5 t6)))) t7))
+  | c1==Black && c2==Red && c3 == Red = Tree Black (Node n2 (Tree Red (Node n1 t4 t5)) (Tree Red (Node n t6 t7)))
+  | otherwise = t1
+rebalance t2@(Tree c1 (Node n t4 (Tree c2 (Node n1 (Tree c3 (Node n2 t5 t6)) t7))))
+  | c1==Black && c2==Red && c3 == Red = Tree Black (Node n2 (Tree Red (Node n t4 t5)) (Tree Red (Node n1 t6 t7)))
+  | otherwise = t2 
+rebalance t3@(Tree c1 (Node n t4 (Tree c2 (Node n1 t5 (Tree c3 (Node n2 t6 t7))))))
+  | c1==Black && c2==Red && c3 == Red = Tree Black (Node n1 (Tree Red (Node n t4 t5)) (Tree Red (Node n2 t6 t7)))
+  | otherwise = t3  
+  
 -- showRBTree(rbZetom(Tree Black (Node 2 (Tree Red (Node 1 (Tree Red (Node 1 (Tree Red Leaf) (Tree Red Leaf))) (Tree Red Leaf))) (Tree Red Leaf)))) 
--- showRBTree(rbZetom(rebalance1(Tree Black (Node 2 (Tree Red (Node 1 (Tree Red (Node 1 (Tree Red Leaf) (Tree Red Leaf))) (Tree Red Leaf))) (Tree Red Leaf))))) 
+-- showRBTree(rbZetom(rebalance(Tree Black (Node 2 (Tree Red (Node 1 (Tree Red (Node 1 (Tree Red Leaf) (Tree Red Leaf))) (Tree Red Leaf))) (Tree Red Leaf))))) 
+-- showRBTree(rbZetom(rebalance(Tree Black (Node 2 (Tree Red (Node 1 (Tree Red Leaf) (Tree Red (Node 1 (Tree Red Leaf) (Tree Red Leaf))))) (Tree Red Leaf))))) 
+-- showRBTree(rbZetom(rebalance(Tree Black (Node 3 (Tree Red Leaf) (Tree Red (Node 8 (Tree Red (Node 6 (Tree Red Leaf) (Tree Red Leaf))) (Tree Red Leaf)))))))
+--showRBTree(rbZetom(rebalance(Tree Black (Node 4 (Tree Red Leaf) (Tree Red (Node 5 (Tree Red Leaf) (Tree Red (Node 6 (Tree Red Leaf) (Tree Red Leaf)))))))))
