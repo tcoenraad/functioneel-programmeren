@@ -32,8 +32,11 @@ greyColourFlip (Tree Black (Node p (Tree Black (Node s (Tree Black r) (Tree Blac
 greyColourFlip (Tree c1 (Node p (Tree Grey g) (Tree Black (Node s (Tree Red (Node l (Tree Black a) (Tree Black b))) (Tree c2 r))))) = (Tree c1 (Node l (Tree Black (Node p (Tree Black g) (Tree Black a))) (Tree Black (Node s (Tree Black b) (Tree c2 r)))))
 greyColourFlip (Tree c1 (Node p (Tree Black (Node s (Tree c2 r) (Tree Red (Node l (Tree Black b) (Tree Black a))))) (Tree Grey g))) = (Tree c1 (Node l (Tree Black (Node s (Tree c2 r) (Tree Black b))) (Tree Black (Node p (Tree Black a) (Tree Black g)))))
 -- p is red
-greyColourFlip (Tree Red (Node p (Tree Grey g) (Tree Black (Node s (Tree Black l) (Tree c r))))) = (Tree Grey (Node s (Tree Red (Node p (Tree Black g) (Tree Black l))) (Tree c r)))
-greyColourFlip (Tree Red (Node p (Tree Black (Node s (Tree c r) (Tree Black l))) (Tree Grey g))) = (Tree Grey (Node s (Tree c r) (Tree Red (Node p (Tree Black l) (Tree Black g)))))
+greyColourFlip (Tree Red (Node p (Tree Grey g) (Tree Black (Node s (Tree Black l) (Tree c r))))) = (Tree Black (Node s (Tree Red (Node p (Tree Black g) (Tree Black l))) (Tree c r)))
+greyColourFlip (Tree Red (Node p (Tree Black (Node s (Tree c r) (Tree Black l))) (Tree Grey g))) = (Tree Black (Node s (Tree c r) (Tree Red (Node p (Tree Black l) (Tree Black g)))))
 -- r is red
-greyColourFlip (Tree Black (Node p (Tree Grey g) (Tree Black (Node s (Tree Black l) (Tree Red r))))) = (Tree Grey (Node s (Tree Black (Node p (Tree Black g) (Tree Black l))) (Tree Black r)))
-greyColourFlip (Tree Black (Node p (Tree Black (Node s (Tree Red r) (Tree Black l))) (Tree Grey g))) = (Tree Grey (Node s (Tree Black r) (Tree Black (Node p (Tree Black l) (Tree Black g)))))
+greyColourFlip (Tree Black (Node p (Tree Grey g) (Tree Black (Node s (Tree Black l) (Tree Red r))))) = (Tree Black (Node s (Tree Black (Node p (Tree Black g) (Tree Black l))) (Tree Black r)))
+greyColourFlip (Tree Black (Node p (Tree Black (Node s (Tree Red r) (Tree Black l))) (Tree Grey g))) = (Tree Black (Node s (Tree Black r) (Tree Black (Node p (Tree Black l) (Tree Black g)))))
+-- s is red
+greyColourFlip (Tree Black (Node p (Tree Grey g) (Tree Red (Node s (Tree Black l) (Tree Black r))))) = (Tree Black (Node s (Tree Red (Node p (Tree Gray g) (Tree Black l))) (Tree Black r)))
+greyColourFlip (Tree Black (Node p (Tree Red (Node s (Tree Black r) (Tree Black l))) (Tree Grey g))) = (Tree Black (Node s ((Tree Black r) Tree Red (Node p (Tree Black l) (Tree Gray g)))))
