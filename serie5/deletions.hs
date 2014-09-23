@@ -44,6 +44,67 @@ greyColourFlip (Tree Black (Node p (Tree Red (Node s (Tree Black r) (Tree Black 
 greyColourFlip t = t
 
 greyRebalance :: RBTree -> RBTree
-greyRebalance (Tree c Leaf) = (Tree c Leaf)
+greyRebalance t@(Tree c Leaf) = t
 greyRebalance t = (Tree c (Node n (greyRebalance t1) (greyRebalance t2))) where
   (Tree c (Node n t1 t2)) = greyColourFlip t
+
+delete :: Number -> RBTree -> RBTree
+delete i t@(Tree c Leaf) = t
+delete i (Tree c (Node n t1 t2@(Tree _ Leaf))) | n == i = t2
+                                               | otherwise = (Tree c (Node n (delete i t1) t2))
+delete i (Tree c (Node n t1 t2)) | n > i = (Tree c (Node n (delete i t1) t2))
+                                 | n < i = (Tree c (Node n t1 (delete i t2)))
+                                 | otherwise = (Tree c (Node (leftmostValue t2) t1 (removeLeftmostNode t2)))
+
+aftekenBoom = Tree Black (Node 15
+                        (Tree Black (Node 7
+                            (Tree Red (Node 3
+                                (Tree Black (Node 1
+                                    (Tree Red (Node 1
+                                        (Tree Black Leaf)
+                                        (Tree Black Leaf)
+                                    ))
+                                    (Tree Red (Node 2
+                                        (Tree Black Leaf)
+                                        (Tree Black Leaf)
+                                    ))
+                                ))
+                                (Tree Black (Node 5
+                                    (Tree Red (Node 4
+                                        (Tree Black Leaf)
+                                        (Tree Black Leaf)
+                                    ))
+                                    (Tree Red (Node 6
+                                        (Tree Black Leaf)
+                                        (Tree Black Leaf)
+                                    ))
+                                ))
+                            ))
+                            (Tree Black (Node 10
+                                (Tree Red (Node 8
+                                    (Tree Black Leaf)
+                                    (Tree Black Leaf)
+                                ))
+                                (Tree Red (Node 12
+                                    (Tree Black Leaf)
+                                    (Tree Black Leaf)
+                                ))
+                            ))
+                        ))
+                        (Tree Black (Node 25
+                            (Tree Black (Node 20
+                                (Tree Black Leaf)
+                                (Tree Black Leaf)
+                            ))
+                            (Tree Red (Node 30
+                                (Tree Black (Node 28
+                                    (Tree Black Leaf)
+                                    (Tree Black Leaf)
+                                ))
+                                (Tree Black (Node 60
+                                    (Tree Black Leaf)
+                                    (Tree Black Leaf)
+                                ))
+                            ))
+                        ))
+                    )
