@@ -1,26 +1,33 @@
 import FPPrac
 import FPPrac.Trees.RedBlackTree
 
-data Col = R | B | G deriving Eq -- Red, Black, Grey 
-data RBTree = T Col NodeType
-data NodeType = L | N Number RBTree RBTree
+data Color = Red | Black | Grey deriving Eq
+data RBTree = Tree Color NodeType
+data NodeType = Leaf | Node Number RBTree RBTree
 
 rbZetom :: RBTree -> RBTreeG
-rbZetom (T R (N i t1 t2)) = RBNodeG RedG (show i) [rbZetom(t1), rbZetom(t2)]
-rbZetom (T B (N i t1 t2)) = RBNodeG BlackG (show i) [rbZetom(t1), rbZetom(t2)]
-rbZetom (T G (N i t1 t2)) = RBNodeG GreyG (show i)[rbZetom(t1), rbZetom(t2)]
-rbZetom (T R L) = RBNodeG RedG "" []
-rbZetom (T B L) = RBNodeG BlackG "" []
-rbZetom (T G L) = RBNodeG GreyG "" []
+rbZetom (Tree Red (Node i t1 t2)) = RBNodeG RedG (show i) [rbZetom(t1), rbZetom(t2)]
+rbZetom (Tree Black (Node i t1 t2)) = RBNodeG BlackG (show i) [rbZetom(t1), rbZetom(t2)]
+rbZetom (Tree Grey (Node i t1 t2)) = RBNodeG GreyG (show i)[rbZetom(t1), rbZetom(t2)]
+rbZetom (Tree Red Leaf) = RBNodeG RedG "" []
+rbZetom (Tree Black Leaf) = RBNodeG BlackG "" []
+rbZetom (Tree Grey Leaf) = RBNodeG GreyG "" []
+
+isRed :: RBTree -> Bool
+isRed (Tree Red _) = True
+isRed _ = False
 
 insert :: Number -> RBTree -> RBTree
-insert n (T c (N i t1 t2)) | n <= i = (T c (N i (insert n (t1)) t2)) 
-						   | otherwise = (T c (N i t1 (insert n (t2)))) 
-insert n (T c L) = T R (N n (T c L) (T c L))
+insert n (Tree c (Node i t1 t2)) | n <= i = (Tree c (Node i (insert n (t1)) t2)) 
+						               | otherwise = (Tree c (Node i t1 (insert n (t2)))) 
+insert n (Tree c Leaf) = Tree Red (Node n (Tree c Leaf) (Tree c Leaf))
 
--- showRBTree(rbZetom(insert 1 (T B (N 2 (T R (N 1 (T B L) (T B L))) (T R (N 3 (T B L) (T B L)))))))
+-- showRBTree(rbZetom(insert 1 (Tree Black(Node 2 (Tree Red (Node 1 (Tree Black Leaf) (Tree Black Leaf))) (Tree Red (Node 3 (Tree Black Leaf) (Tree Black Leaf)))))))
 
 rootToBlack :: RBTree -> RBTree
-rootToBlack (T c (N i t1 t2)) = T B (N i t1 t2)
+rootToBlack t@(Tree Red (Node n t1 t2))
+  | isRed t1 || isRed t2 = (Tree Black (Node n t1 t2))
+  | otherwise = t
+rootToBlack t = t
 
--- showRBTree(rbZetom(rootToBlack(T R (N 2 (T R (N 1 (T B L) (T B L))) (T R (N 3 (T B L) (T B L)))))))
+-- showRBTree(rbZetom(rootToBlack(Tree Red (Node 2 (Tree Red (Node 1 (Tree Black Leaf) (Tree Black Leaf))) (Tree Red (Node 3 (Tree Black Leaf) (Tree Black Leaf)))))))
