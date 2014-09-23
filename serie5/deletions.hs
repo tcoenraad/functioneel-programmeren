@@ -40,3 +40,8 @@ greyColourFlip (Tree Black (Node p (Tree Black (Node s (Tree Red r) (Tree Black 
 -- s is red
 greyColourFlip (Tree Black (Node p (Tree Grey g) (Tree Red (Node s (Tree Black l) (Tree Black r))))) = (Tree Black (Node s (Tree Red (Node p (Tree Grey g) (Tree Black l))) (Tree Black r)))
 greyColourFlip (Tree Black (Node p (Tree Red (Node s (Tree Black r) (Tree Black l))) (Tree Grey g))) = (Tree Black (Node s (Tree Black r) (Tree Red (Node p (Tree Black l) (Tree Grey g)))))
+
+greyRebalance :: RBTree -> RBTree
+greyRebalance (Tree c Leaf) = (Tree c Leaf)
+greyRebalance t = (Tree c (Node n (greyRebalance t1) (greyRebalance t2))) where
+  (Tree c (Node n t1 t2)) = greyColourFlip t
