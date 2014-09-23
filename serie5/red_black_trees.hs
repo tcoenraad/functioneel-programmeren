@@ -33,22 +33,6 @@ colourFlip t@(Tree Black (Node n (Tree Red (Node n1 t4 t5)) (Tree Red (Node n2 t
   | otherwise = t
 colourFlip t = t
 
---Tree Black
---  (Node 2
---    (Tree Red 
---      (Node 1
---        (Tree Black Leaf)
---        (Tree Black Leaf)
---      )
---    )
---    (Tree Red
---      (Node 3
---        (Tree Black Leaf)
---        (Tree Black Leaf)
---      )
---    )
---  )
-
 rebalance :: RBTree -> RBTree
 -- case b
 rebalance t1@(Tree c1 (Node a (Tree c2 (Node b (Tree c3 (Node c lll llr)) lr)) r))
