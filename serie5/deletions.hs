@@ -13,9 +13,9 @@ rbZetom (Tree Red Leaf) = RBNodeG RedG "" []
 rbZetom (Tree Black Leaf) = RBNodeG BlackG "" []
 rbZetom (Tree Grey Leaf) = RBNodeG GreyG "" []
 
-leftmostValue :: RBTree -> RBTree
-leftmostValue t@(Tree c (Node n (Tree _ Leaf) t2)) = t
-leftmostValue (Tree c (Node n t1 t2)) = leftmostValue (t1)
+leftmostValue :: RBTree -> Number
+leftmostValue (Tree c (Node n (Tree _ Leaf) _)) = n
+leftmostValue (Tree c (Node n t1 _)) = leftmostValue t1
 
 -- leftmostValue(Tree Black (Node 3 (Tree Red (Node 1 (Tree Red Leaf) (Tree Red (Node 2 (Tree Red Leaf) (Tree Red Leaf))))) (Tree Red Leaf))) 
 
