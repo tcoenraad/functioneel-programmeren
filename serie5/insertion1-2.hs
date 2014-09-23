@@ -1,8 +1,8 @@
 import FPPrac
 import FPPrac.Trees.RedBlackTree
 
-data Color = Red | Black | Grey deriving Eq
-data RBTree = Tree Color NodeType
+data Colour = Red | Black | Grey deriving Eq
+data RBTree = Tree Colour NodeType
 data NodeType = Leaf | Node Number RBTree RBTree
 
 rbZetom :: RBTree -> RBTreeG
@@ -31,3 +31,24 @@ rootToBlack t@(Tree Red (Node n t1 t2))
 rootToBlack t = t
 
 -- showRBTree(rbZetom(rootToBlack(Tree Red (Node 2 (Tree Red (Node 1 (Tree Black Leaf) (Tree Black Leaf))) (Tree Red (Node 3 (Tree Black Leaf) (Tree Black Leaf)))))))
+
+colourFlip :: RBTree -> RBTree
+colourFlip t@(Tree Black (Node n (Tree Red (Node n1 t4 t5)) (Tree Red (Node n2 t6 t7))))
+  | any isRed [t4, t5, t6, t7] = Tree Red (Node n (Tree Black (Node n1 t4 t5)) (Tree Black (Node n2 t6 t7)))
+  | otherwise = t
+
+--Tree Black
+--  (Node 2
+--    (Tree Red 
+--      (Node 1
+--        (Tree Red Leaf)
+--        (Tree Red Leaf)
+--      )
+--    )
+--    (Tree Red
+--      (Node 3
+--        (Tree Red Leaf)
+--        (Tree Red Leaf)
+--      )
+--    )
+--  )
