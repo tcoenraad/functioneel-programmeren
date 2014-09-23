@@ -31,6 +31,7 @@ rootToBlack t@(Tree c (Node n t1 t2))
 
 -- showRBTree(rbZetom(rootToBlack(Tree Red (Node 2 (Tree Red (Node 1 (Tree Black Leaf) (Tree Black Leaf))) (Tree Red (Node 3 (Tree Black Leaf) (Tree Black Leaf)))))))
 
+-- case a
 colourFlip :: RBTree -> RBTree
 colourFlip t@(Tree Black (Node n (Tree Red (Node n1 t4 t5)) (Tree Red (Node n2 t6 t7))))
   | any isRed [t4, t5, t6, t7] = Tree Red (Node n (Tree Black (Node n1 t4 t5)) (Tree Black (Node n2 t6 t7)))
@@ -53,13 +54,14 @@ colourFlip t@(Tree Black (Node n (Tree Red (Node n1 t4 t5)) (Tree Red (Node n2 t
 --  )
 
 rebalance :: RBTree -> RBTree
+-- case b
 rebalance t1@(Tree c1 (Node a (Tree c2 (Node b (Tree c3 (Node c lll llr)) lr)) r))
   | c1 == Black && c2 == Red && c3 == Red = Tree Black (Node b (Tree Red (Node c lll llr)) (Tree Red (Node a lr r)))
   | otherwise = t1
 rebalance t2@(Tree c1 (Node a l (Tree c2 (Node b rl (Tree c3 (Node c rrl rrr))))))
   | c1 == Black && c2 == Red && c3 == Red = Tree Black (Node b (Tree Red (Node a l rl)) (Tree Red (Node c rrl rrr)))
   | otherwise = t2
-
+-- case c
 rebalance t3@(Tree c1 (Node a (Tree c2 (Node b ll (Tree c3 (Node c lrl lrr)))) r))
   | c1 == Black && c2 == Red && c3 == Red = Tree Black (Node c (Tree Red (Node b ll lrl)) (Tree Red (Node a lrr t7)))
   | otherwise = t3
