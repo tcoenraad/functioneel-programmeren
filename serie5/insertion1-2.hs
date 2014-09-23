@@ -25,10 +25,9 @@ insert n (Tree c Leaf) = Tree Red (Node n (Tree c Leaf) (Tree c Leaf))
 -- showRBTree(rbZetom(insert 1 (Tree Black(Node 2 (Tree Red (Node 1 (Tree Black Leaf) (Tree Black Leaf))) (Tree Red (Node 3 (Tree Black Leaf) (Tree Black Leaf)))))))
 
 rootToBlack :: RBTree -> RBTree
-rootToBlack t@(Tree Red (Node n t1 t2))
-  | isRed t1 || isRed t2 = (Tree Black (Node n t1 t2))
+rootToBlack t@(Tree c (Node n t1 t2))
+  | c==Red =(Tree Black (Node n t1 t2))
   | otherwise = t
-rootToBlack t = t
 
 -- showRBTree(rbZetom(rootToBlack(Tree Red (Node 2 (Tree Red (Node 1 (Tree Black Leaf) (Tree Black Leaf))) (Tree Red (Node 3 (Tree Black Leaf) (Tree Black Leaf)))))))
 
@@ -71,4 +70,10 @@ rebalance t3@(Tree c1 (Node n t4 (Tree c2 (Node n1 t5 (Tree c3 (Node n2 t6 t7)))
 -- showRBTree(rbZetom(rebalance(Tree Black (Node 2 (Tree Red (Node 1 (Tree Red (Node 1 (Tree Red Leaf) (Tree Red Leaf))) (Tree Red Leaf))) (Tree Red Leaf))))) 
 -- showRBTree(rbZetom(rebalance(Tree Black (Node 2 (Tree Red (Node 1 (Tree Red Leaf) (Tree Red (Node 1 (Tree Red Leaf) (Tree Red Leaf))))) (Tree Red Leaf))))) 
 -- showRBTree(rbZetom(rebalance(Tree Black (Node 3 (Tree Red Leaf) (Tree Red (Node 8 (Tree Red (Node 6 (Tree Red Leaf) (Tree Red Leaf))) (Tree Red Leaf)))))))
---showRBTree(rbZetom(rebalance(Tree Black (Node 4 (Tree Red Leaf) (Tree Red (Node 5 (Tree Red Leaf) (Tree Red (Node 6 (Tree Red Leaf) (Tree Red Leaf)))))))))
+-- showRBTree(rbZetom(rebalance(Tree Black (Node 4 (Tree Red Leaf) (Tree Red (Node 5 (Tree Red Leaf) (Tree Red (Node 6 (Tree Red Leaf) (Tree Red Leaf)))))))))
+
+balancedInsert :: Number -> RBTree -> RBTree
+balancedInsert n (Tree c (Node i t1 t2)) = rootToBlack(colourFlip(rebalance(insert n (Tree c (Node i t1 t2)))))
+
+-- showRBTree(rbZetom(balancedInsert 4 (Tree Black (Node 7 (Tree Red (Node 3 (Tree Black Leaf) (Tree Black Leaf))) (Tree Red Leaf)))))
+-- showRBTree(rbZetom(colourFlip(rebalance(insert 4 (Tree Black (Node 7 (Tree Red (Node 3 (Tree Black Leaf) (Tree Black Leaf))) (Tree Red Leaf)))))))
