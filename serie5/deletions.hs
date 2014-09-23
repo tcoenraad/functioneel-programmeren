@@ -38,5 +38,5 @@ greyColourFlip (Tree Red (Node p (Tree Black (Node s (Tree c r) (Tree Black l)))
 greyColourFlip (Tree Black (Node p (Tree Grey g) (Tree Black (Node s (Tree Black l) (Tree Red r))))) = (Tree Black (Node s (Tree Black (Node p (Tree Black g) (Tree Black l))) (Tree Black r)))
 greyColourFlip (Tree Black (Node p (Tree Black (Node s (Tree Red r) (Tree Black l))) (Tree Grey g))) = (Tree Black (Node s (Tree Black r) (Tree Black (Node p (Tree Black l) (Tree Black g)))))
 -- s is red
-greyColourFlip (Tree Black (Node p (Tree Grey g) (Tree Red (Node s (Tree Black l) (Tree Black r))))) = (Tree Black (Node s (Tree Red (Node p (Tree Gray g) (Tree Black l))) (Tree Black r)))
-greyColourFlip (Tree Black (Node p (Tree Red (Node s (Tree Black r) (Tree Black l))) (Tree Grey g))) = (Tree Black (Node s ((Tree Black r) Tree Red (Node p (Tree Black l) (Tree Gray g)))))
+greyColourFlip (Tree Black (Node p (Tree Grey g) (Tree Red (Node s (Tree Black l) (Tree Black r))))) = (Tree Black (Node s (Tree Red (Node p (Tree Grey g) (Tree Black l))) (Tree Black r)))
+greyColourFlip (Tree Black (Node p (Tree Red (Node s (Tree Black r) (Tree Black l))) (Tree Grey g))) = (Tree Black (Node s (Tree Black r) (Tree Red (Node p (Tree Black l) (Tree Grey g)))))
