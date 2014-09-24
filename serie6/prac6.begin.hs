@@ -16,6 +16,7 @@ data Store = Store
              , pressedW :: Bool
              , pressedF :: Bool
              , pressedQ :: Bool
+             , pressedZ :: Bool
              , node1Select :: Maybe Node
              , node2Select :: Maybe Node
              , graph :: Graph
@@ -35,6 +36,7 @@ beginStore = Store  { pressedN = False
                     , pressedW = False
                     , pressedF = False
                     , pressedQ = False
+                    , pressedZ = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     , graph   = beginGraph
@@ -50,7 +52,8 @@ instructions = Instructions [ "Instructions",
                               "Press 'd', click on a node to delete the node",
                               "Press 'w', click on two nodes and press a number to weight the edge in between",
                               "Press 'f', click on two nodes to delete an edge",
-                              "Press 'q', click on a node to color it red"
+                              "Press 'q', click on a node to color it red",
+                              "Press 'z', click on a node to color all adjacent nodes blue"
                             ]                             
 
 -- | Resetcommands
@@ -63,6 +66,7 @@ resetCommands s = s { pressedN = False
                     , pressedW = False
                     , pressedF = False
                     , pressedQ = False
+                    , pressedZ = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     }
@@ -220,11 +224,16 @@ eventloop s (KeyPress "q") = ([], s' {pressedQ = True})
                       where
                           s' = resetCommands s                                          
 
+-- | Zet het bijbehorende commando bij de toetsaanslag                          
+eventloop s (KeyPress "z") = ([], s' {pressedZ = True})
+                      where
+                          s' = resetCommands s                                          
+
 -- | Deze functie geeft het correcte gedrag bij een muisklik.
 --   Afhankelijk van welke toetsaanslag al is ingedrukt en of er
 --   op een nodige is geklikt, wordt een variabele gezet of de complete
 --   Store gezet met resetCommands.
-eventloop s@(Store pn pr pe pd pw pf pq n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
+eventloop s@(Store pn pr pe pd pw pf pq pz n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
                                                                         | pd && node /= Nothing                    = (output2, s' {graph=graph2})
                                                                         | pr && n1s  == Nothing                    = ([], s{node1Select = node})
                                                                         | pe && n1s  == Nothing                    = ([], s{node1Select = node})
@@ -234,13 +243,15 @@ eventloop s@(Store pn pr pe pd pw pf pq n1s n2s g) (MouseUp MLeft pos)  | pn && 
                                                                         | pf && n1s == Nothing                     = ([], s{node1Select = node})
                                                                         | pf && n1s /= Nothing                     = (output4, s' {graph=graph4})
                                                                         | pq && node /= Nothing                    = (output5, s' {graph=graph5})
+                                                                        | pz && node /= Nothing                    = (output6, s' {graph=graph6})
                                                                         | otherwise                                = ([], s)
                                                                               where
                                                                                 (output1, graph1) = insertNode pos g
                                                                                 (output2, graph2) = deleteNode (fromJust node) g
                                                                                 (output3, graph3) = insertEdge (fromJust n1s) (fromJust node) g
                                                                                 (output4, graph4) = deleteEdge (fromJust n1s) (fromJust node) g
-                                                                                (output5, graph5) = recolorNode (fromJust node) g
+                                                                                (output5, graph5) = recolorNode (fromJust node) Red g
+                                                                                (output6, graph6) = colorAdjacentNodesBlue (fromJust node) g
                                                                                 node              = onNode (nodes g) pos
                                                                                 s' = resetCommands s
 
@@ -337,5 +348,43 @@ deleteEdge (l1, _, _) (l2, _, _) g = ([RemoveEdgeG l1 l2], g')
                                     where
                                         g' = removeEdge l1 l2 g
 
-recolorNode :: Node -> Graph -> ([GraphOutput], Graph)
-recolorNode (l, p, c) g = ([(nodeToOutput (l, p, Red))], g)
+-- | Geeft een node een nieuwe kleur
+recolorNode :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
+recolorNode (l, p, cOld) c g = ([nodeToOutput (l, p, c)], g') where
+  g' = colorNodeInGraph (l, p, cOld) c g
+
+colorNodeInGraph :: Node -> ColorG -> Graph -> Graph
+colorNodeInGraph (l, p, _) c g = g'' where
+  g' = removeNode l g
+  g'' = addNode (l, p, c) g'
+
+colorNodesInGraph :: [Node] -> ColorG -> Graph -> Graph
+colorNodesInGraph [] c g = g
+colorNodesInGraph [n] c g = colorNodeInGraph n c g
+colorNodesInGraph (n:ns) c g = (colorNodesInGraph ns c g')
+  where
+    g' = (colorNodeInGraph n c g)
+
+-- | Kleurt aanliggende nodes
+colorAdjacentNodes :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
+colorAdjacentNodes n c g = (map nodeToOutput ns, g')
+  where
+    adj = findAdjacentNodes n g
+    ns = map (\(l, p, _) -> (l, p, c)) adj
+    g' = colorNodesInGraph adj Blue g
+
+nodeToLabel :: Node -> Label
+nodeToLabel (l, _, _) = l
+
+findAdjacentNodes :: Node -> Graph -> [Node]
+findAdjacentNodes n g@Graph{directed=Directed} = map fromJust (map (flip (findNode) g) nodes) where
+  adj = findDirectedEdgesSingleLabel (nodeToLabel n) g
+  nodes = map (\(_, endNode, _, _) -> endNode) adj
+findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (map (flip (findNode) g) nodes) where
+  adj = findEdgesSingleLabel (nodeToLabel n) g
+  beginNodes = map (\(beginNode, _, _, _) -> beginNode) adj
+  endNodes = map (\(_, endNode, _, _) -> endNode) adj
+  nodes = filter (/= nodeToLabel n) (beginNodes ++ endNodes)
+
+findDirectedEdgesSingleLabel :: Label -> Graph -> [Edge]
+findDirectedEdgesSingleLabel l (Graph{edges=es}) = filter (\(el1, el2, _, _) -> el1 == l) es
