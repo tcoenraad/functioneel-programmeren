@@ -15,6 +15,7 @@ data Store = Store
              , pressedD :: Bool
              , pressedW :: Bool
              , pressedF :: Bool
+             , pressedQ :: Bool
              , node1Select :: Maybe Node
              , node2Select :: Maybe Node
              , graph :: Graph
@@ -33,6 +34,7 @@ beginStore = Store  { pressedN = False
                     , pressedD = False
                     , pressedW = False
                     , pressedF = False
+                    , pressedQ = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     , graph   = beginGraph
@@ -47,7 +49,8 @@ instructions = Instructions [ "Instructions",
                               "Press 'e', click on two nodes to create an edge",
                               "Press 'd', click on a node to delete the node",
                               "Press 'w', click on two nodes and press a number to weight the edge in between",
-                              "Press 'f', click on two nodes to delete an edge"
+                              "Press 'f', click on two nodes to delete an edge",
+                              "Press 'q', click on a node to color it red"
                             ]                             
 
 -- | Resetcommands
@@ -59,6 +62,7 @@ resetCommands s = s { pressedN = False
                     , pressedD = False
                     , pressedW = False
                     , pressedF = False
+                    , pressedQ = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     }
@@ -211,11 +215,16 @@ eventloop s (KeyPress "f") = ([], s' {pressedF = True})
                       where
                           s' = resetCommands s                                          
 
+-- | Zet het bijbehorende commando bij de toetsaanslag                          
+eventloop s (KeyPress "q") = ([], s' {pressedQ = True})
+                      where
+                          s' = resetCommands s                                          
+
 -- | Deze functie geeft het correcte gedrag bij een muisklik.
 --   Afhankelijk van welke toetsaanslag al is ingedrukt en of er
 --   op een nodige is geklikt, wordt een variabele gezet of de complete
 --   Store gezet met resetCommands.
-eventloop s@(Store pn pr pe pd pw pf n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
+eventloop s@(Store pn pr pe pd pw pf pq n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
                                                                         | pd && node /= Nothing                    = (output2, s' {graph=graph2})
                                                                         | pr && n1s  == Nothing                    = ([], s{node1Select = node})
                                                                         | pe && n1s  == Nothing                    = ([], s{node1Select = node})
@@ -224,12 +233,14 @@ eventloop s@(Store pn pr pe pd pw pf n1s n2s g) (MouseUp MLeft pos)  | pn && nod
                                                                         | pw && n1s /= Nothing                     = ([], s{node2Select = node})
                                                                         | pf && n1s == Nothing                     = ([], s{node1Select = node})
                                                                         | pf && n1s /= Nothing                     = (output4, s' {graph=graph4})
+                                                                        | pq && node /= Nothing                    = (output5, s' {graph=graph5})
                                                                         | otherwise                                = ([], s)
                                                                               where
                                                                                 (output1, graph1) = insertNode pos g
                                                                                 (output2, graph2) = deleteNode (fromJust node) g
                                                                                 (output3, graph3) = insertEdge (fromJust n1s) (fromJust node) g
                                                                                 (output4, graph4) = deleteEdge (fromJust n1s) (fromJust node) g
+                                                                                (output5, graph5) = recolorNode (fromJust node) g
                                                                                 node              = onNode (nodes g) pos
                                                                                 s' = resetCommands s
 
@@ -325,3 +336,6 @@ deleteEdge :: Node -> Node -> Graph -> ([GraphOutput], Graph)
 deleteEdge (l1, _, _) (l2, _, _) g = ([RemoveEdgeG l1 l2], g')
                                     where
                                         g' = removeEdge l1 l2 g
+
+recolorNode :: Node -> Graph -> ([GraphOutput], Graph)
+recolorNode (l, p, c) g = ([(nodeToOutput (l, p, Red))], g)
