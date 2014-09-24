@@ -145,12 +145,17 @@ edgeToOutput graph@(Graph {weighted=weighted, directed=directed}) e@(l1, l2, c, 
                                                                                    | otherwise             = LineG n1 n2 c Thin directed 
                                                                                    where
                                                                                        (n1, n2) = findNodesByEdge e graph
+graphToOutput :: Graph -> [GraphOutput]
+graphToOutput g@Graph {nodes=nodes, edges=edges} = map nodeToOutput nodes ++ map (edgeToOutput g) edges ++ [instructions]
 
 -- | De Eventloop
 --   Dit is het hart van het grafische IO programma.
 --   Elk input dat van belang is wordt gemapt naar
 --   de bijbehorende uitvoer.
 eventloop :: Store -> GraphInput -> ([GraphOutput], Store)
+
+-- @ start
+eventloop s@(Store {graph=graph}) Start = (graphToOutput graph, s)
 
 -- | Deze functie hernoemt een node wanneer alle 
 --   benodigde variabelen zijn gezet
