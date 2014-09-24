@@ -31,6 +31,7 @@ colourFlip :: RBTree -> RBTree
 colourFlip t@(Tree Black (Node n (Tree Red (Node n1 t4 t5)) (Tree Red (Node n2 t6 t7))))
   | any isRed [t4, t5, t6, t7] = Tree Red (Node n (Tree Black (Node n1 t4 t5)) (Tree Black (Node n2 t6 t7)))
   | otherwise = t
+-- else
 colourFlip t = t
 
 rebalance :: RBTree -> RBTree
@@ -50,11 +51,12 @@ rebalance t3@(Tree c1 (Node a (Tree c2 (Node b ll (Tree c3 (Node c lrl lrr)))) r
 rebalance t3@(Tree c1 (Node a r (Tree c2 (Node b (Tree c3 (Node c lrr lrl)) ll))))
   | c1 == Black && c2 == Red && c3 == Red = Tree Black (Node c (Tree Red (Node a r lrr)) (Tree Red (Node b lrl ll)))
   | otherwise = t3
+-- else
+rebalance t = t
 
 rebalanceTree :: RBTree -> RBTree
 rebalanceTree t@(Tree c Leaf) = t
-rebalanceTree t = (Tree c (Node n (rebalanceTree t1) (rebalanceTree t2))) where
-  (Tree c (Node n t1 t2)) = colourFlip t
+rebalanceTree (Tree c (Node n t1 t2)) = (rebalance.colourFlip) $ Tree c $ Node n (rebalanceTree t1) (rebalanceTree t2)
 
 balancedInsert :: Number -> RBTree -> RBTree
 balancedInsert a (Tree c (Node i t1 t2)) = rootToBlack(rebalanceTree(insert a (Tree c (Node i t1 t2))))
