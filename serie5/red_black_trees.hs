@@ -64,8 +64,15 @@ leftmostValue (Tree c (Node n (Tree _ Leaf) _)) = n
 leftmostValue (Tree c (Node n t1 _)) = leftmostValue t1
 
 removeLeftmostNode :: RBTree -> RBTree
+-- if red node, return just right subtree
+removeLeftmostNode (Tree Red (Node _ (Tree _ Leaf) t2)) = t2
+-- if black node and subtree Red, return just right subtree
+removeLeftmostNode (Tree Black (Node _ (Tree _ Leaf) t2@(Tree Red _))) = t2
+-- if both leaves, return grey leaf
 removeLeftmostNode (Tree _ (Node _ (Tree _ Leaf) (Tree _ Leaf))) = Tree Grey Leaf
+-- if left leaf, right node, return right substree
 removeLeftmostNode (Tree _ (Node _ (Tree _ Leaf) t2)) = t2
+-- else, look further on the left
 removeLeftmostNode (Tree c (Node n t1 t2)) = (Tree c (Node n (removeLeftmostNode t1) t2))
 
 greyColourFlip :: RBTree -> RBTree
@@ -94,11 +101,11 @@ greyRebalance t = (Tree c (Node n (greyRebalance t1) (greyRebalance t2))) where
 
 delete :: Number -> RBTree -> RBTree
 delete i t@(Tree c Leaf) = t
-delete i (Tree c (Node n t1 t2@(Tree _ Leaf))) | n == i = t2
+delete i (Tree c (Node n t1 t2@(Tree _ Leaf))) | n == i = t1
                                                | otherwise = (Tree c (Node n (delete i t1) t2))
 delete i (Tree c (Node n t1 t2)) | n > i = (Tree c (Node n (delete i t1) t2))
                                  | n < i = (Tree c (Node n t1 (delete i t2)))
-                                 | otherwise = (Tree c (Node (leftmostValue t2) t1 (removeLeftmostNode t2)))
+                                 | otherwise = greyRebalance(Tree c (Node (leftmostValue t2) t1 (removeLeftmostNode t2)))
 
 aftekenBoom = Tree Black (Node 15
                         (Tree Black (Node 7
