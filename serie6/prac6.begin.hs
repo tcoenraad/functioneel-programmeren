@@ -251,7 +251,7 @@ eventloop s@(Store pn pr pe pd pw pf pq pz n1s n2s g) (MouseUp MLeft pos)  | pn 
                                                                                 (output3, graph3) = insertEdge (fromJust n1s) (fromJust node) g
                                                                                 (output4, graph4) = deleteEdge (fromJust n1s) (fromJust node) g
                                                                                 (output5, graph5) = recolorNode (fromJust node) Red g
-                                                                                (output6, graph6) = colorAdjacentNodesBlue (fromJust node) g
+                                                                                (output6, graph6) = colorAdjacentNodes (fromJust node) Blue g
                                                                                 node              = onNode (nodes g) pos
                                                                                 s' = resetCommands s
 
@@ -367,17 +367,17 @@ colorNodesInGraph (n:ns) c g = (colorNodesInGraph ns c g')
 
 -- | Kleurt aanliggende nodes
 colorAdjacentNodes :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
-colorAdjacentNodes n c g = (map nodeToOutput ns, g')
+colorAdjacentNodes n c g = (map nodeToOutput recoloredNodes, g')
   where
-    adj = findAdjacentNodes n g
-    ns = map (\(l, p, _) -> (l, p, c)) adj
-    g' = colorNodesInGraph adj Blue g
+    nodes = findAdjacentNodes n g
+    recoloredNodes = map (\(l, p, _) -> (l, p, c)) nodes
+    g' = colorNodesInGraph nodes c g
 
 nodeToLabel :: Node -> Label
 nodeToLabel (l, _, _) = l
 
 findAdjacentNodes :: Node -> Graph -> [Node]
-findAdjacentNodes n g@Graph{directed=Directed} = map fromJust (map (flip (findNode) g) nodes) where
+findAdjacentNodes n g@Graph {directed=Directed} = map fromJust (map (flip (findNode) g) nodes) where
   adj = findDirectedEdgesSingleLabel (nodeToLabel n) g
   nodes = map (\(_, endNode, _, _) -> endNode) adj
 findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (map (flip (findNode) g) nodes) where
