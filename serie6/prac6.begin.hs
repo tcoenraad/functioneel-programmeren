@@ -17,6 +17,7 @@ data Store = Store
              , pressedF :: Bool
              , pressedQ :: Bool
              , pressedZ :: Bool
+             , pressedX :: Bool
              , node1Select :: Maybe Node
              , node2Select :: Maybe Node
              , graph :: Graph
@@ -37,6 +38,7 @@ beginStore = Store  { pressedN = False
                     , pressedF = False
                     , pressedQ = False
                     , pressedZ = False
+                    , pressedX = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     , graph   = beginGraph
@@ -53,7 +55,8 @@ instructions = Instructions [ "Instructions",
                               "Press 'w', click on two nodes and press a number to weight the edge in between",
                               "Press 'f', click on two nodes to delete an edge",
                               "Press 'q', click on a node to color it red",
-                              "Press 'z', click on a node to color all adjacent nodes blue"
+                              "Press 'z', click on a node to color all adjacent nodes blue",
+                              "Press 'x' and click on the sceen to reset everything"
                             ]                             
 
 -- | Resetcommands
@@ -67,6 +70,7 @@ resetCommands s = s { pressedN = False
                     , pressedF = False
                     , pressedQ = False
                     , pressedZ = False
+                    , pressedX = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     }
@@ -229,11 +233,16 @@ eventloop s (KeyPress "z") = ([], s' {pressedZ = True})
                       where
                           s' = resetCommands s                                          
 
+-- | Zet het bijbehorende commando bij de toetsaanslag                          
+eventloop s (KeyPress "x") = ([], s' {pressedX = True})
+                      where
+                          s' = resetCommands s                                          
+
 -- | Deze functie geeft het correcte gedrag bij een muisklik.
 --   Afhankelijk van welke toetsaanslag al is ingedrukt en of er
 --   op een nodige is geklikt, wordt een variabele gezet of de complete
 --   Store gezet met resetCommands.
-eventloop s@(Store pn pr pe pd pw pf pq pz n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
+eventloop s@(Store pn pr pe pd pw pf pq pz px n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
                                                                         | pd && node /= Nothing                    = (output2, s' {graph=graph2})
                                                                         | pr && n1s  == Nothing                    = ([], s{node1Select = node})
                                                                         | pe && n1s  == Nothing                    = ([], s{node1Select = node})
@@ -244,6 +253,7 @@ eventloop s@(Store pn pr pe pd pw pf pq pz n1s n2s g) (MouseUp MLeft pos)  | pn 
                                                                         | pf && n1s /= Nothing                     = (output4, s' {graph=graph4})
                                                                         | pq && node /= Nothing                    = (output5, s' {graph=graph5})
                                                                         | pz && node /= Nothing                    = (output6, s' {graph=graph6})
+                                                                        | px                                       = (output7, s' {graph=graph7})
                                                                         | otherwise                                = ([], s)
                                                                               where
                                                                                 (output1, graph1) = insertNode pos g
@@ -252,6 +262,7 @@ eventloop s@(Store pn pr pe pd pw pf pq pz n1s n2s g) (MouseUp MLeft pos)  | pn 
                                                                                 (output4, graph4) = deleteEdge (fromJust n1s) (fromJust node) g
                                                                                 (output5, graph5) = recolorNode (fromJust node) Red g
                                                                                 (output6, graph6) = colorAdjacentNodes (fromJust node) Blue g
+                                                                                (output7, graph7) = colorAllNodes Black g
                                                                                 node              = onNode (nodes g) pos
                                                                                 s' = resetCommands s
 
@@ -388,3 +399,9 @@ findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (map (flip (find
 
 findDirectedEdgesSingleLabel :: Label -> Graph -> [Edge]
 findDirectedEdgesSingleLabel l (Graph{edges=es}) = filter (\(el1, el2, _, _) -> el1 == l) es
+
+colorAllNodes :: ColorG -> Graph -> ([GraphOutput], Graph)
+colorAllNodes c g@Graph {nodes=nodes} = (map nodeToOutput recoloredNodes, g')
+  where
+    recoloredNodes = map (\(l, p, _) -> (l, p, c)) nodes
+    g' = colorNodesInGraph nodes c g
