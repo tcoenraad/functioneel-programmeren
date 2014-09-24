@@ -364,6 +364,24 @@ recolorNode :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
 recolorNode (l, p, cOld) c g = ([nodeToOutput (l, p, c)], g') where
   g' = colorNodeInGraph (l, p, cOld) c g
 
+-- | Kleurt aanliggende nodes
+colorAdjacentNodes :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
+colorAdjacentNodes n c g = (map nodeToOutput recoloredNodes, g')
+  where
+    nodes = findAdjacentNodes n g
+    recoloredNodes = map (\(l, p, _) -> (l, p, c)) nodes
+    g' = colorNodesInGraph nodes c g
+
+-- | Kleurt alle nodes
+colorAllNodes :: ColorG -> Graph -> ([GraphOutput], Graph)
+colorAllNodes c g@Graph {nodes=nodes} = (map nodeToOutput recoloredNodes, g')
+  where
+    recoloredNodes = map (\(l, p, _) -> (l, p, c)) nodes
+    g' = colorNodesInGraph nodes c g
+
+nodeToLabel :: Node -> Label
+nodeToLabel (l, _, _) = l
+
 colorNodeInGraph :: Node -> ColorG -> Graph -> Graph
 colorNodeInGraph (l, p, _) c g = g'' where
   g' = removeNode l g
@@ -376,16 +394,8 @@ colorNodesInGraph (n:ns) c g = (colorNodesInGraph ns c g')
   where
     g' = (colorNodeInGraph n c g)
 
--- | Kleurt aanliggende nodes
-colorAdjacentNodes :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
-colorAdjacentNodes n c g = (map nodeToOutput recoloredNodes, g')
-  where
-    nodes = findAdjacentNodes n g
-    recoloredNodes = map (\(l, p, _) -> (l, p, c)) nodes
-    g' = colorNodesInGraph nodes c g
-
-nodeToLabel :: Node -> Label
-nodeToLabel (l, _, _) = l
+findDirectedEdgesSingleLabel :: Label -> Graph -> [Edge]
+findDirectedEdgesSingleLabel l (Graph{edges=es}) = filter (\(el1, _, _, _) -> el1 == l) es
 
 findAdjacentNodes :: Node -> Graph -> [Node]
 findAdjacentNodes n g@Graph {directed=Directed} = map fromJust (map (flip (findNode) g) nodes) where
@@ -396,12 +406,3 @@ findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (map (flip (find
   beginNodes = map (\(beginNode, _, _, _) -> beginNode) adj
   endNodes = map (\(_, endNode, _, _) -> endNode) adj
   nodes = filter (/= nodeToLabel n) (beginNodes ++ endNodes)
-
-findDirectedEdgesSingleLabel :: Label -> Graph -> [Edge]
-findDirectedEdgesSingleLabel l (Graph{edges=es}) = filter (\(el1, el2, _, _) -> el1 == l) es
-
-colorAllNodes :: ColorG -> Graph -> ([GraphOutput], Graph)
-colorAllNodes c g@Graph {nodes=nodes} = (map nodeToOutput recoloredNodes, g')
-  where
-    recoloredNodes = map (\(l, p, _) -> (l, p, c)) nodes
-    g' = colorNodesInGraph nodes c g
