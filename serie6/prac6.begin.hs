@@ -398,11 +398,13 @@ findDirectedEdgesSingleLabel :: Label -> Graph -> [Edge]
 findDirectedEdgesSingleLabel l (Graph{edges=es}) = filter (\(el1, _, _, _) -> el1 == l) es
 
 findAdjacentNodes :: Node -> Graph -> [Node]
-findAdjacentNodes n g@Graph {directed=Directed} = map fromJust (map (flip (findNode) g) nodes) where
-  adj = findDirectedEdgesSingleLabel (nodeToLabel n) g
-  nodes = map (\(_, endNode, _, _) -> endNode) adj
-findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (map (flip (findNode) g) nodes) where
-  adj = findEdgesSingleLabel (nodeToLabel n) g
-  beginNodes = map (\(beginNode, _, _, _) -> beginNode) adj
-  endNodes = map (\(_, endNode, _, _) -> endNode) adj
-  nodes = filter (/= nodeToLabel n) (beginNodes ++ endNodes)
+findAdjacentNodes n g@Graph {directed=Directed} = map fromJust nodes where
+  adjacentEdges = findDirectedEdgesSingleLabel (nodeToLabel n) g
+  adjacentLabels = map (\(_, endNode, _, _) -> endNode) adjacentEdges
+  nodes = map (flip (findNode) g) adjacentLabels
+findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (nodes) where
+  adjacentEdges = findEdgesSingleLabel (nodeToLabel n) g
+  beginLabels = map (\(beginLabel, _, _, _) -> beginLabel) adjacentEdges
+  endLabels = map (\(_, endLabel, _, _) -> endLabel) adjacentEdges
+  adjacentLabels = filter (/= nodeToLabel n) (beginLabels ++ endLabels)
+  nodes = map (flip (findNode) g) adjacentLabels
