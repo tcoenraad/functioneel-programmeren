@@ -372,8 +372,9 @@ deleteEdge (l1, _, _) (l2, _, _) g = ([RemoveEdgeG l1 l2], g')
 
 -- | Geeft een node een nieuwe kleur
 recolorNode :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
-recolorNode (l, p, cOld) c g = ([nodeToOutput (l, p, c)], g') where
-  g' = colorNodeInGraph (l, p, cOld) c g
+recolorNode n@(l, p, _) c g = ([nodeToOutput n'], g') where
+  n' = (l, p, c)
+  g' = colorNodeInGraph n c g
 
 -- | Kleurt aanliggende nodes
 colorAdjacentNodes :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
@@ -411,9 +412,10 @@ nodeToLabel :: Node -> Label
 nodeToLabel (l, _, _) = l
 
 colorNodeInGraph :: Node -> ColorG -> Graph -> Graph
-colorNodeInGraph (l, p, _) c g = g'' where
-  g' = removeNode l g
-  g'' = addNode (l, p, c) g'
+colorNodeInGraph (l, p, _) c g = g''
+  where
+    g' = removeNode l g
+    g'' = addNode (l, p, c) g'
 
 colorNodesInGraph :: [Node] -> ColorG -> Graph -> Graph
 colorNodesInGraph [] c g = g
@@ -426,25 +428,27 @@ findDirectedEdgesSingleLabel :: Label -> Graph -> [Edge]
 findDirectedEdgesSingleLabel l (Graph{edges=es}) = filter (\(el1, _, _, _) -> el1 == l) es
 
 findAdjacentNodes :: Node -> Graph -> [Node]
-findAdjacentNodes n g@Graph {directed=Directed} = map fromJust nodes where
-  adjacentEdges = findDirectedEdgesSingleLabel (nodeToLabel n) g
-  adjacentLabels = map (\(_, endNode, _, _) -> endNode) adjacentEdges
-  nodes = map (flip (findNode) g) adjacentLabels
-findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (nodes) where
-  adjacentEdges = findEdgesSingleLabel (nodeToLabel n) g
-  beginLabels = map (\(beginLabel, _, _, _) -> beginLabel) adjacentEdges
-  endLabels = map (\(_, endLabel, _, _) -> endLabel) adjacentEdges
-  adjacentLabels = filter (/= nodeToLabel n) (beginLabels ++ endLabels)
-  nodes = map (flip (findNode) g) adjacentLabels
-
-isCompleted :: Graph -> Bool
-isCompleted g@Graph{nodes=nodes} = and (map (flip isCompletedNode g) nodes)
-
-isCompletedNode :: Node -> Graph -> Bool
-isCompletedNode n g@Graph{nodes=nodes} = and (map (flip elem adjacentNodes) otherNodes)
+findAdjacentNodes n g@Graph {directed=Directed} = map fromJust nodes
   where
-  adjacentNodes = findAdjacentNodes n g
-  otherNodes = (\\) nodes [n]
+    adjacentEdges = findDirectedEdgesSingleLabel (nodeToLabel n) g
+    adjacentLabels = map (\(_, endNode, _, _) -> endNode) adjacentEdges
+    nodes = map (flip findNode g) adjacentLabels
+findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (nodes)
+  where
+    adjacentEdges = findEdgesSingleLabel (nodeToLabel n) g
+    beginLabels = map (\(beginLabel, _, _, _) -> beginLabel) adjacentEdges
+    endLabels = map (\(_, endLabel, _, _) -> endLabel) adjacentEdges
+    adjacentLabels = filter (/= nodeToLabel n) (beginLabels ++ endLabels)
+    nodes = map (flip findNode g) adjacentLabels
+
+isComplete :: Graph -> Bool
+isComplete g@Graph{nodes=nodes} = and (map (flip isCompleteNode g) nodes)
+
+isCompleteNode :: Node -> Graph -> Bool
+isCompleteNode n g@Graph{nodes=nodes} = and (map (flip elem adjacentNodes) otherNodes)
+  where
+    adjacentNodes = findAdjacentNodes n g
+    otherNodes = (\\) nodes [n]
 
 isConnected :: Graph -> Bool
 isConnected g@Graph{nodes=nodes} = and (map (flip elem allConnectedNodes) nodes)
