@@ -26,7 +26,7 @@ data Store = Store
              
 -- | Begingraph
 --   Dit is de begintoestand van de graaf             
-beginGraph = Graph [('a', (50,50), Orange), ('b', (100, 100), Black)] [('a', 'b', Black, 5)] Undirected Weighted
+beginGraph = Graph [('a', (50,50), Orange), ('b', (100, 100), Black), ('c', (150,150), Blue)] [('a', 'b', Black, 5)] Undirected Weighted
 
 -- | BeginStore
 --   Dit is de begintoestand van de store
@@ -408,3 +408,13 @@ findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (nodes) where
   endLabels = map (\(_, endLabel, _, _) -> endLabel) adjacentEdges
   adjacentLabels = filter (/= nodeToLabel n) (beginLabels ++ endLabels)
   nodes = map (flip (findNode) g) adjacentLabels
+
+isCompleted :: Graph -> Bool
+isCompleted g@Graph{nodes=nodes} = and (map (flip isCompletedNode g) nodes)
+
+isCompletedNode :: Node -> Graph -> Bool
+isCompletedNode n g@Graph{nodes=nodes} = and (map (flip elem adjacentNodes) otherNodes)
+  where
+  adjacentNodes = findAdjacentNodes n g
+  otherNodes = (\\) nodes [n]
+
