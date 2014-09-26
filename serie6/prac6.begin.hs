@@ -419,7 +419,6 @@ colorNodeInGraph (l, p, _) c g = g''
 
 colorNodesInGraph :: [Node] -> ColorG -> Graph -> Graph
 colorNodesInGraph [] c g = g
-colorNodesInGraph [n] c g = colorNodeInGraph n c g
 colorNodesInGraph (n:ns) c g = (colorNodesInGraph ns c g')
   where
     g' = (colorNodeInGraph n c g)
