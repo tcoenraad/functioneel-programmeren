@@ -26,7 +26,7 @@ data Store = Store
              
 -- | Begingraph
 --   Dit is de begintoestand van de graaf             
-beginGraph = Graph [('a', (50,50), Orange), ('b', (100, 100), Black), ('c', (150, 150), Blue), ('d', (100, 200), Blue)] [('a', 'b', Black, 5), ('b', 'd', Black, 5), ('c', 'd', Black, 5)] Undirected Weighted
+beginGraph = Graph [('a', (50,50), Orange), ('b', (100, 100), Black), ('c', (150, 150), Blue), ('d', (100, 200), Blue)] [('a', 'b', Black, 5), ('b', 'b', Black, 5), ('c', 'd', Black, 5)] Undirected Weighted
 
 -- | BeginStore
 --   Dit is de begintoestand van de store
@@ -427,8 +427,21 @@ findSubgraph :: Node -> Graph -> [Node]
 findSubgraph n g = [n] ++ findSubgraph' [] g n 
 
 findSubgraph' :: [Node] -> Graph -> Node -> [Node]
-findSubgraph' visitedNodes g n = neighbours' ++ concat (map (findSubgraph' (n:visitedNodes) g) neighbours')
+findSubgraph' visitedNodes g n = neighbours' ++ concat (map (findSubgraph' visitedNodes' g) neighbours')
   where
     neighbours = findAdjacentNodes n g
     neighbours' = (\\) neighbours visitedNodes
+    visitedNodes' = (n:visitedNodes)
 
+findSubgraphs :: Graph -> [[Node]]
+findSubgraphs g@Graph{nodes=nodes} = take (length subgraphs - 1) subgraphs
+  where
+    subgraphs = findSubgraphs' [] nodes g
+
+findSubgraphs' :: [Node] -> [Node] -> Graph -> [[Node]]
+findSubgraphs' visitedNodes [] g = [[]]
+findSubgraphs' visitedNodes remainingNodes g = [subgraph] ++ findSubgraphs' visitedNodes' remainingNodes' g
+  where
+    subgraph = findSubgraph (head remainingNodes) g
+    visitedNodes' = subgraph ++ visitedNodes
+    remainingNodes' = (\\) remainingNodes visitedNodes'
