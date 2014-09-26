@@ -26,7 +26,7 @@ data Store = Store
              
 -- | Begingraph
 --   Dit is de begintoestand van de graaf             
-beginGraph = Graph [('a', (50,50), Orange), ('b', (100, 100), Black), ('c', (150,150), Blue)] [('a', 'b', Black, 5)] Undirected Weighted
+beginGraph = Graph [('a', (50,50), Orange), ('b', (100, 100), Black), ('c', (150, 150), Blue), ('d', (100, 200), Blue)] [('a', 'b', Black, 5), ('b', 'd', Black, 5), ('c', 'd', Black, 5)] Undirected Weighted
 
 -- | BeginStore
 --   Dit is de begintoestand van de store
@@ -418,3 +418,15 @@ isCompletedNode n g@Graph{nodes=nodes} = and (map (flip elem adjacentNodes) othe
   adjacentNodes = findAdjacentNodes n g
   otherNodes = (\\) nodes [n]
 
+isConnected :: Graph -> Bool
+isConnected g@Graph{nodes=nodes} = and (map (flip elem ([(head nodes)] ++ allConnectedNodes)) nodes)
+  where
+  allConnectedNodes = findAllNodesConnected g nodes
+
+findAllNodesConnected :: Graph -> [Node] -> [Node]
+findAllNodesConnected g [] = [] 
+findAllNodesConnected g (n:ns) = adjacentNodes ++ findAllNodesConnected g'' ns
+ where
+ adjacentNodes = findAdjacentNodes n g
+ g' = removeEdgesSingleLabel (nodeToLabel n) g
+ g'' = removeNode (nodeToLabel n) g'
