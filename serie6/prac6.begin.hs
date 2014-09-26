@@ -366,18 +366,18 @@ recolorNode (l, p, cOld) c g = ([nodeToOutput (l, p, c)], g') where
 
 -- | Kleurt aanliggende nodes
 colorAdjacentNodes :: Node -> ColorG -> Graph -> ([GraphOutput], Graph)
-colorAdjacentNodes n c g = (map nodeToOutput recoloredNodes, g')
-  where
-    nodes = findAdjacentNodes n g
-    recoloredNodes = map (\(l, p, _) -> (l, p, c)) nodes
-    g' = colorNodesInGraph nodes c g
+colorAdjacentNodes n c g = colorNodes (findAdjacentNodes n g) c g
 
 -- | Kleurt alle nodes
 colorAllNodes :: ColorG -> Graph -> ([GraphOutput], Graph)
-colorAllNodes c g@Graph {nodes=nodes} = (map nodeToOutput recoloredNodes, g')
+colorAllNodes c g@Graph {nodes=nodes} = colorNodes nodes c g
+
+colorNodes :: [Node] -> ColorG -> Graph -> ([GraphOutput], Graph)
+colorNodes ns c g = (coloredNodesOutput, g')
   where
-    recoloredNodes = map (\(l, p, _) -> (l, p, c)) nodes
-    g' = colorNodesInGraph nodes c g
+    coloredNodes = map (\(l, p, _) -> (l, p, c)) ns
+    coloredNodesOutput = map nodeToOutput coloredNodes
+    g' = colorNodesInGraph ns c g
 
 nodeToLabel :: Node -> Label
 nodeToLabel (l, _, _) = l
