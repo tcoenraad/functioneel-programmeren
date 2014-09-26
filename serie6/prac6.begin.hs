@@ -18,6 +18,7 @@ data Store = Store
              , pressedQ :: Bool
              , pressedZ :: Bool
              , pressedX :: Bool
+             , pressedC :: Bool
              , node1Select :: Maybe Node
              , node2Select :: Maybe Node
              , graph :: Graph
@@ -39,6 +40,7 @@ beginStore = Store  { pressedN = False
                     , pressedQ = False
                     , pressedZ = False
                     , pressedX = False
+                    , pressedC = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     , graph   = beginGraph
@@ -56,7 +58,8 @@ instructions = Instructions [ "Instructions",
                               "Press 'f', click on two nodes to delete an edge",
                               "Press 'q', click on a node to color it red",
                               "Press 'z', click on a node to color all adjacent nodes blue",
-                              "Press 'x' and click on the sceen to reset everything"
+                              "Press 'x' and click on the screen to reset everything",
+                              "Press 'c' and click on the screen to color all subgraphs"
                             ]                             
 
 -- | Resetcommands
@@ -71,6 +74,7 @@ resetCommands s = s { pressedN = False
                     , pressedQ = False
                     , pressedZ = False
                     , pressedX = False
+                    , pressedC = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     }
@@ -238,11 +242,16 @@ eventloop s (KeyPress "x") = ([], s' {pressedX = True})
                       where
                           s' = resetCommands s                                          
 
+-- | Zet het bijbehorende commando bij de toetsaanslag                          
+eventloop s (KeyPress "c") = ([], s' {pressedC = True})
+                      where
+                          s' = resetCommands s                                          
+
 -- | Deze functie geeft het correcte gedrag bij een muisklik.
 --   Afhankelijk van welke toetsaanslag al is ingedrukt en of er
 --   op een nodige is geklikt, wordt een variabele gezet of de complete
 --   Store gezet met resetCommands.
-eventloop s@(Store pn pr pe pd pw pf pq pz px n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
+eventloop s@(Store pn pr pe pd pw pf pq pz px pc n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
                                                                         | pd && node /= Nothing                    = (output2, s' {graph=graph2})
                                                                         | pr && n1s  == Nothing                    = ([], s{node1Select = node})
                                                                         | pe && n1s  == Nothing                    = ([], s{node1Select = node})
@@ -254,6 +263,7 @@ eventloop s@(Store pn pr pe pd pw pf pq pz px n1s n2s g) (MouseUp MLeft pos)  | 
                                                                         | pq && node /= Nothing                    = (output5, s' {graph=graph5})
                                                                         | pz && node /= Nothing                    = (output6, s' {graph=graph6})
                                                                         | px                                       = (output7, s' {graph=graph7})
+                                                                        | pc                                       = (output8, s' {graph=graph8})
                                                                         | otherwise                                = ([], s)
                                                                               where
                                                                                 (output1, graph1) = insertNode pos g
@@ -263,6 +273,7 @@ eventloop s@(Store pn pr pe pd pw pf pq pz px n1s n2s g) (MouseUp MLeft pos)  | 
                                                                                 (output5, graph5) = recolorNode (fromJust node) Red g
                                                                                 (output6, graph6) = colorAdjacentNodes (fromJust node) Blue g
                                                                                 (output7, graph7) = colorAllNodes Black g
+                                                                                (output8, graph8) = colorAllSubgraphsRandomly g [Blue, Red, Orange, Black]
                                                                                 node              = onNode (nodes g) pos
                                                                                 s' = resetCommands s
 
@@ -371,6 +382,23 @@ colorAdjacentNodes n c g = colorNodes (findAdjacentNodes n g) c g
 -- | Kleurt alle nodes
 colorAllNodes :: ColorG -> Graph -> ([GraphOutput], Graph)
 colorAllNodes c g@Graph {nodes=nodes} = colorNodes nodes c g
+
+-- | Kleurt alle subgrafen willekeurig
+colorAllSubgraphsRandomly :: Graph -> [ColorG] -> ([GraphOutput], Graph)
+colorAllSubgraphsRandomly g c = colorListsOfNodes (findSubgraphs g) c g
+
+colorListsOfNodes :: [[Node]] -> [ColorG] -> Graph -> ([GraphOutput], Graph)
+colorListsOfNodes n c g = (coloredNodesOutput, g')
+  where
+    output = (colorListsOfNodes' n c g)
+    coloredNodesOutput = concat (map fst output)
+    g' = snd (last output)
+
+colorListsOfNodes' :: [[Node]] -> [ColorG] -> Graph -> [([GraphOutput], Graph)]
+colorListsOfNodes' [] (c:cs) g = [([], g)]
+colorListsOfNodes' (n:ns) (c:cs) g = [(coloredNodesOutput, g')] ++ colorListsOfNodes' ns (cs ++ [c]) g'
+  where
+    (coloredNodesOutput, g') = colorNodes n c g
 
 colorNodes :: [Node] -> ColorG -> Graph -> ([GraphOutput], Graph)
 colorNodes ns c g = (coloredNodesOutput, g')
