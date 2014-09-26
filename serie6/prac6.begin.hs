@@ -419,14 +419,16 @@ isCompletedNode n g@Graph{nodes=nodes} = and (map (flip elem adjacentNodes) othe
   otherNodes = (\\) nodes [n]
 
 isConnected :: Graph -> Bool
-isConnected g@Graph{nodes=nodes} = and (map (flip elem ([(head nodes)] ++ allConnectedNodes)) nodes)
+isConnected g@Graph{nodes=nodes} = and (map (flip elem allConnectedNodes) nodes)
   where
-  allConnectedNodes = findAllNodesConnected g nodes
+    allConnectedNodes = findSubgraph (head nodes) g
 
-findAllNodesConnected :: Graph -> [Node] -> [Node]
-findAllNodesConnected g [] = [] 
-findAllNodesConnected g (n:ns) = adjacentNodes ++ findAllNodesConnected g'' ns
- where
- adjacentNodes = findAdjacentNodes n g
- g' = removeEdgesSingleLabel (nodeToLabel n) g
- g'' = removeNode (nodeToLabel n) g'
+findSubgraph :: Node -> Graph -> [Node]
+findSubgraph n g = [n] ++ findSubgraph' [] g n 
+
+findSubgraph' :: [Node] -> Graph -> Node -> [Node]
+findSubgraph' visitedNodes g n = neighbours' ++ concat (map (findSubgraph' (n:visitedNodes) g) neighbours')
+  where
+    neighbours = findAdjacentNodes n g
+    neighbours' = (\\) neighbours visitedNodes
+
