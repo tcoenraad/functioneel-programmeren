@@ -27,7 +27,7 @@ data Store = Store
              
 -- | Begingraph
 --   Dit is de begintoestand van de graaf             
-beginGraph = Graph [('a', (50,50), Orange), ('b', (100, 100), Black), ('c', (150, 150), Blue), ('d', (100, 200), Blue)] [('b', 'c', Black, 5), ('c', 'd', Black, 5), ('b', 'd', Black, 5)] Directed Weighted
+beginGraph = Graph [('a', (50,50), Orange), ('b', (300, 50), Black), ('c', (175, 50), Blue), ('d', (100, 100), Blue), ('e', (200, 100), Red)] [('a', 'd', Black, 5), ('a', 'c', Black, 5), ('e', 'b', Black, 5), ('c', 'b', Black, 5)] Directed Weighted
 
 -- | BeginStore
 --   Dit is de begintoestand van de store
@@ -478,8 +478,4 @@ findSubgraphs' visitedNodes remainingNodes g = [subgraph] ++ findSubgraphs' visi
     remainingNodes' = (\\) remainingNodes visitedNodes'
 
 isReachable :: Node -> Node -> Graph -> Bool
-isReachable a b g = elem b (connectedNodes a g)
-
-connectedNodes :: Node -> Graph -> [Node]
-connectedNodes n g | findAdjacentNodes n g == [] = []
-                   | otherwise = findAdjacentNodes n g ++ concat (map (flip findAdjacentNodes g) (connectedNodes n g))
+isReachable a b g = elem b (findSubgraph a g)
