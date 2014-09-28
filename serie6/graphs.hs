@@ -27,7 +27,7 @@ data Store = Store
              
 -- | Begingraph
 --   Dit is de begintoestand van de graaf             
-beginGraph = Graph [('a', (50,50), Orange), ('b', (300, 50), Black), ('c', (175, 50), Blue), ('d', (100, 100), Blue), ('e', (200, 100), Red)] [('a', 'd', Black, 5), ('a', 'c', Black, 5), ('e', 'b', Black, 5), ('c', 'b', Black, 5)] Directed Weighted
+beginGraph = Graph [('a', (50,50), Orange), ('b', (300, 50), Black), ('c', (175, 50), Blue), ('d', (100, 100), Blue), ('e', (200, 100), Red)] [('a', 'd', Black, 5), ('d', 'e', Black, 5), ('a', 'c', Black, 5), ('e', 'b', Black, 5), ('c', 'b', Black, 5)] Directed Weighted
 
 -- | BeginStore
 --   Dit is de begintoestand van de store
@@ -251,31 +251,31 @@ eventloop s (KeyPress "c") = ([], s' {pressedC = True})
 --   Afhankelijk van welke toetsaanslag al is ingedrukt en of er
 --   op een nodige is geklikt, wordt een variabele gezet of de complete
 --   Store gezet met resetCommands.
-eventloop s@(Store pn pr pe pd pw pf pq pz px pc n1s n2s g) (MouseUp MLeft pos)  | pn && node == Nothing                    = (output1, s' {graph=graph1})
-                                                                                 | pd && node /= Nothing                    = (output2, s' {graph=graph2})
-                                                                                 | pr && n1s  == Nothing                    = ([], s{node1Select = node})
-                                                                                 | pe && n1s  == Nothing                    = ([], s{node1Select = node})
-                                                                                 | pe && n1s  /= Nothing && node /= Nothing = (output3, s' {graph=graph3})
-                                                                                 | pw && n1s == Nothing                     = ([], s{node1Select = node})
-                                                                                 | pw && n1s /= Nothing                     = ([], s{node2Select = node})
-                                                                                 | pf && n1s == Nothing                     = ([], s{node1Select = node})
-                                                                                 | pf && n1s /= Nothing                     = (output4, s' {graph=graph4})
-                                                                                 | pq && node /= Nothing                    = (output5, s' {graph=graph5})
-                                                                                 | pz && node /= Nothing                    = (output6, s' {graph=graph6})
-                                                                                 | px                                       = (output7, s' {graph=graph7})
-                                                                                 | pc                                       = (output8, s' {graph=graph8})
-                                                                                 | otherwise                                = ([], s)
-                                                                                    where
-                                                                                     (output1, graph1) = insertNode pos g
-                                                                                     (output2, graph2) = deleteNode (fromJust node) g
-                                                                                     (output3, graph3) = insertEdge (fromJust n1s) (fromJust node) g
-                                                                                     (output4, graph4) = deleteEdge (fromJust n1s) (fromJust node) g
-                                                                                     (output5, graph5) = recolorNode (fromJust node) Red g
-                                                                                     (output6, graph6) = colorAdjacentNodes (fromJust node) Blue g
-                                                                                     (output7, graph7) = colorAllNodes Black g
-                                                                                     (output8, graph8) = colorAllSubgraphsRandomly g [Blue, Red, Orange, Black]
-                                                                                     node              = onNode (nodes g) pos
-                                                                                     s' = resetCommands s
+eventloop s@(Store pn pr pe pd pw pf pq pz px pc n1s n2s g) (MouseUp MLeft pos)   | pn && node == Nothing                    = (output1, s' {graph=graph1})
+                                                                                     | pd && node /= Nothing                    = (output2, s' {graph=graph2})
+                                                                                     | pr && n1s  == Nothing                    = ([], s{node1Select = node})
+                                                                                     | pe && n1s  == Nothing                    = ([], s{node1Select = node})
+                                                                                     | pe && n1s  /= Nothing && node /= Nothing = (output3, s' {graph=graph3})
+                                                                                     | pw && n1s == Nothing                     = ([], s{node1Select = node})
+                                                                                     | pw && n1s /= Nothing                     = ([], s{node2Select = node})
+                                                                                     | pf && n1s == Nothing                     = ([], s{node1Select = node})
+                                                                                     | pf && n1s /= Nothing                     = (output4, s' {graph=graph4})
+                                                                                     | pq && node /= Nothing                    = (output5, s' {graph=graph5})
+                                                                                     | pz && node /= Nothing                    = (output6, s' {graph=graph6})
+                                                                                     | px                                       = (output7, s' {graph=graph7})
+                                                                                     | pc                                       = (output8, s' {graph=graph8})
+                                                                                     | otherwise                                = ([], s)
+                                                                                        where
+                                                                                         (output1, graph1) = insertNode pos g
+                                                                                         (output2, graph2) = deleteNode (fromJust node) g
+                                                                                         (output3, graph3) = insertEdge (fromJust n1s) (fromJust node) g
+                                                                                         (output4, graph4) = deleteEdge (fromJust n1s) (fromJust node) g
+                                                                                         (output5, graph5) = recolorNode (fromJust node) Red g
+                                                                                         (output6, graph6) = colorAdjacentNodes (fromJust node) Blue g
+                                                                                         (output7, graph7) = colorAllNodes Black g
+                                                                                         (output8, graph8) = colorAllSubgraphsRandomly g [Blue, Red, Orange, Black]
+                                                                                         node              = onNode (nodes g) pos
+                                                                                         s' = resetCommands s
 
 -- | Voor alle andere uitvoer hoeft er niks te gebeuren                                                                                
 eventloop s _ = ([], s)  
@@ -411,6 +411,9 @@ colorNodes ns c g = (coloredNodesOutput, g')
 nodeToLabel :: Node -> Label
 nodeToLabel (l, _, _) = l
 
+edgeToLabel :: Edge -> Label
+edgeToLabel (l, _, _, _) = l
+
 colorNodeInGraph :: Node -> ColorG -> Graph -> Graph
 colorNodeInGraph (l, p, _) c g = g''
   where
@@ -479,3 +482,25 @@ findSubgraphs' visitedNodes remainingNodes g = [subgraph] ++ findSubgraphs' visi
 
 isReachable :: Node -> Node -> Graph -> Bool
 isReachable a b g = elem b (findSubgraph a g)
+
+paths :: Node -> Node -> Graph -> [[Edge]]
+paths a b g = take (length (paths' a b g) - 1) (paths' a b g)
+
+paths' :: Node -> Node -> Graph -> [[Edge]]
+paths' a b g | isReachable a b g == False = [[]]
+             | otherwise = [path a b g] ++ paths' a b g'
+              where
+                g' = removeEdges (map edgeToLabel (path a b g) ++ [nodeToLabel b]) g
+
+removeEdges :: [Label] -> Graph -> Graph
+removeEdges [l] g = g
+removeEdges (l:ls) g = removeEdges ls (removeEdge l (head ls) g)
+
+path :: Node -> Node -> Graph -> [Edge]
+path a b g | head (findAdjacentNodes a g)==b = findDirectedEdgesSingleLabel (nodeToLabel a) g
+           | isReachable n b g == False = path a (head ns) g 
+           | otherwise = [head a'] ++ path n b g
+             where 
+              (n:ns) = findAdjacentNodes a g
+              a' = findDirectedEdgesSingleLabel (nodeToLabel a) g
+              n' = findDirectedEdgesSingleLabel (nodeToLabel n) g 
