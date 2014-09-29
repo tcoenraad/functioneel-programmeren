@@ -20,6 +20,7 @@ data Store = Store
              , pressedX :: Bool
              , pressedC :: Bool
              , pressedP :: Bool
+             , pressedS :: Bool
              , node1Select :: Maybe Node
              , node2Select :: Maybe Node
              , graph :: Graph
@@ -28,7 +29,7 @@ data Store = Store
              
 -- | Begingraph
 --   Dit is de begintoestand van de graaf             
-beginGraph = Graph [('a', (50,50), Orange), ('b', (300, 50), Black), ('c', (175, 50), Blue), ('d', (100, 100), Blue), ('e', (200, 100), Red)] [('c', 'd', Black, 5), ('d', 'e', Black, 5), ('a', 'c', Black, 5), ('e', 'b', Black, 5), ('c', 'b', Black, 5)] Directed Weighted
+beginGraph = Graph [('a', (50,50), Orange), ('b', (300, 50), Black), ('c', (175, 50), Blue), ('d', (100, 100), Blue), ('e', (200, 100), Red)] [('c', 'd', Black, 5), ('d', 'e', Black, 5), ('a', 'c', Black, 5), ('a', 'd', Black, 5), ('c', 'e', Black, 5),('e', 'b', Black, 5)] Directed Weighted
 
 -- | BeginStore
 --   Dit is de begintoestand van de store
@@ -43,6 +44,7 @@ beginStore = Store  { pressedN = False
                     , pressedX = False
                     , pressedC = False
                     , pressedP = False
+                    , pressedS = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     , graph   = beginGraph
@@ -62,7 +64,8 @@ instructions = Instructions [ "Instructions",
                               "Press 'z', click on a node to color all adjacent nodes blue",
                               "Press 'x' and click on the screen to reset everything",
                               "Press 'c' and click on the screen to color all subgraphs",
-                              "Press 'p', click on two nodes to color the path between the nodes"
+                              "Press 'p', click on two nodes to color the path between the nodes",
+                              "Press 's', click on two nodes to color the shortest path between the nodes"
                             ]                             
 
 -- | Resetcommands
@@ -79,6 +82,7 @@ resetCommands s = s { pressedN = False
                     , pressedX = False
                     , pressedC = False
                     , pressedP = False
+                    , pressedS = False
                     , node1Select = Nothing
                     , node2Select = Nothing
                     }
@@ -255,12 +259,16 @@ eventloop s (KeyPress "c") = ([], s' {pressedC = True})
 eventloop s (KeyPress "p") = ([], s' {pressedP = True})
                       where
                           s' = resetCommands s                                         
-
+ 
+ -- | Zet het bijbehorende commando bij de toetsaanslag                          
+eventloop s (KeyPress "s") = ([], s' {pressedS = True})
+                      where
+                          s' = resetCommands s    
 -- | Deze functie geeft het correcte gedrag bij een muisklik.
 --   Afhankelijk van welke toetsaanslag al is ingedrukt en of er
 --   op een nodige is geklikt, wordt een variabele gezet of de complete
 --   Store gezet met resetCommands.
-eventloop s@(Store pn pr pe pd pw pf pq pz px pc pp n1s n2s g) (MouseUp MLeft pos)   | pn && node == Nothing                    = (output1, s' {graph=graph1})
+eventloop s@(Store pn pr pe pd pw pf pq pz px pc pp ps n1s n2s g) (MouseUp MLeft pos)   | pn && node == Nothing                    = (output1, s' {graph=graph1})
                                                                                      | pd && node /= Nothing                    = (output2, s' {graph=graph2})
                                                                                      | pr && n1s  == Nothing                    = ([], s{node1Select = node})
                                                                                      | pe && n1s  == Nothing                    = ([], s{node1Select = node})
@@ -275,6 +283,8 @@ eventloop s@(Store pn pr pe pd pw pf pq pz px pc pp n1s n2s g) (MouseUp MLeft po
                                                                                      | pc                                       = (output8, s' {graph=graph8})
                                                                                      | pp && n1s == Nothing                     = ([], s{node1Select = node})
                                                                                      | pp && n1s /= Nothing && node /= Nothing  = (output9, s' {graph=graph9})
+                                                                                     | ps && n1s == Nothing                     = ([], s{node1Select = node})
+                                                                                     | ps && n1s /= Nothing && node /= Nothing  = (output10, s' {graph=graph10})
                                                                                      | otherwise                                = ([], s)
                                                                                         where
                                                                                          (output1, graph1) = insertNode pos g
@@ -286,6 +296,7 @@ eventloop s@(Store pn pr pe pd pw pf pq pz px pc pp n1s n2s g) (MouseUp MLeft po
                                                                                          (output7, graph7) = colorAllNodes Black g
                                                                                          (output8, graph8) = colorAllSubgraphsRandomly g [Blue, Red, Orange, Black]
                                                                                          (output9, graph9) = colorAllPathsRandomly (fromJust n1s) (fromJust node) g [Blue, Red, Orange, Black]
+                                                                                         (output10, graph10) = colorShortestPath (fromJust n1s) (fromJust node) g Purple
                                                                                          node              = onNode (nodes g) pos
                                                                                          s' = resetCommands s
 
@@ -424,6 +435,9 @@ colorNodes ns c g = (coloredNodesOutput, g')
 colorAllPathsRandomly :: Node -> Node -> Graph -> [ColorG] -> ([GraphOutput], Graph)
 colorAllPathsRandomly a b g c = colorListsOfEdges (paths a b g) c g
 
+colorShortestPath :: Node -> Node -> Graph -> ColorG -> ([GraphOutput], Graph)
+colorShortestPath a b g c = (graphToOutput (colorEdgesInGraph (calculatePaths a b g) c g), g)
+
 colorEdges :: [Edge] -> ColorG -> Graph -> ([GraphOutput], Graph)
 colorEdges es c g = (coloredEdgesOutput, g')
   where
@@ -532,7 +546,7 @@ isReachable :: Node -> Node -> Graph -> Bool
 isReachable a b g = elem b (findSubgraph a g)
 
 paths :: Node -> Node -> Graph -> [[Edge]]
-paths a b g | all (<=1) lengths == True = [path a b g] 
+paths a b g  | all (<=1) lengths == True = [path a b g] 
              | otherwise = [path a b g] ++ paths a b g'
                 where
                   nodes =  findSubgraph a g                  
@@ -571,3 +585,23 @@ path a b g | head (findAdjacentNodes a g)==b = findDirectedEdgesSingleLabel (nod
               (n:ns) = findAdjacentNodes a g
               a' = findDirectedEdgesSingleLabel (nodeToLabel a) g
               n' = findDirectedEdgesSingleLabel (nodeToLabel n) g 
+
+calculatePaths :: Node -> Node -> Graph -> [Edge]
+calculatePaths a b g = calculatePaths' (paths a b g)
+
+calculatePaths' :: [[Edge]] -> [Edge]
+calculatePaths' (e:es) | lengthPath e == lengthShortestPath = e
+                       | otherwise = calculatePaths' es
+                         where
+                          lengthShortestPath = minimum (lengthPaths (e:es))
+
+lengthPaths :: [[Edge]] -> [Int]
+lengthPaths [] = []
+lengthPaths (p:ps) =  [lengthPath p] ++ lengthPaths ps
+
+weightOfEdge :: Edge -> Int
+weightOfEdge (l1, l2, c, w) = w
+
+lengthPath :: [Edge] -> Int
+lengthPath [] = 0
+lengthPath (e:es) = weightOfEdge e + lengthPath es
