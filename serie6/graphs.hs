@@ -2,8 +2,8 @@ import FPPrac
 import FPPrac.Graphs
 import Data.Maybe
 import Data.Char (isDigit)
-import Data.List ((\\), delete)
-    
+import Data.List ((\\), delete, sortBy)
+import Debug.Trace
 
 -- | Store datatype
 --   Hiermee worden alle variabelen van het
@@ -295,7 +295,7 @@ eventloop s@(Store pn pr pe pd pw pf pq pz px pc pp ps n1s n2s g) (MouseUp MLeft
                                                                                            (output6, graph6)   = colorAdjacentNodes (fromJust node) Blue g
                                                                                            (output7, graph7)   = colorAllNodesAndEdges Black g 
                                                                                            (output8, graph8)   = colorAllSubgraphsRandomly g [Blue, Red, Orange, Black]
-                                                                                           (output9, graph9)   = colorAllPathsOneByOne (fromJust n1s) (fromJust node) g Blue
+                                                                                           (output9, graph9)   = colorAllPathsOneByOne (fromJust n1s) (fromJust node) g Red
                                                                                            (output10, graph10) = colorShortestPath (fromJust n1s) (fromJust node) g Purple
                                                                                            node                = onNode (nodes g) pos
                                                                                            s'                  = resetCommands s
@@ -441,24 +441,23 @@ colorNodes ns c g = (coloredNodesOutput, g')
     coloredNodesOutput = map nodeToOutput coloredNodes
     g' = colorNodesInGraph ns c g
 
-colorAllPathsOneByOne' :: [[Edge]] -> Graph -> ColorG -> ([GraphOutput], Graph)
-colorAllPathsOneByOne' [p] g c = colorEdges p c g
-colorAllPathsOneByOne' (p:ps) g c | colorOfPathIsBlue p /= True = colorAllPathsOneByOne' ps g c
-                                  | otherwise = (graphToOutput g1', g1')
+-- | Kleurt alle paden van a naar b één voor één
+colorAllPathsOneByOne :: Node -> Node -> Graph -> ColorG -> ([GraphOutput], Graph)
+colorAllPathsOneByOne a b g c = colorAllPathsOneByOne' paths (length paths) g c
+  where
+    paths = findPaths a b g
+
+colorAllPathsOneByOne' :: [[Edge]] -> Number -> Graph -> ColorG -> ([GraphOutput], Graph)
+colorAllPathsOneByOne' [] n g c = (graphToOutput g, g)
+colorAllPathsOneByOne' (p:ps) n g c | n /= -1 && isColorOfPath p c /= True = colorAllPathsOneByOne' (ps++[p]) (n-1) g c
+                                    | otherwise = (graphToOutput g1', g1')
                                      where
                                        g1 = colorEdgesInGraph p Black g
                                        g1' = colorEdgesInGraph (head ps) c g1
-                                       
--- | Kleurt alle paden van a naar b één voor één
-colorAllPathsOneByOne :: Node -> Node -> Graph -> ColorG -> ([GraphOutput], Graph)
-colorAllPathsOneByOne a b g c =  colorAllPathsOneByOne' ps g c
-  where
-    ps = findPaths a b g 
     
-colorOfPathIsBlue :: [Edge] -> Bool
-colorOfPathIsBlue [] = True
-colorOfPathIsBlue (p:ps) | colorOfEdge p == Blue = colorOfPathIsBlue ps
-                         | otherwise = False
+isColorOfPath :: [Edge] -> ColorG -> Bool
+isColorOfPath [p] c = colorOfEdge p == c
+isColorOfPath (p:ps) c = colorOfEdge p == c && isColorOfPath ps c
 
 colorOfEdge :: Edge -> ColorG
 colorOfEdge (_, _, c, _) = c  
@@ -517,18 +516,21 @@ findDirectedEdgesSingleLabel :: Label -> Graph -> [Edge]
 findDirectedEdgesSingleLabel l (Graph{edges=es}) = filter (\(el1, _, _, _) -> el1 == l) es
 
 findAdjacentNodes :: Node -> Graph -> [Node]
-findAdjacentNodes n g@Graph {directed=Directed} = map fromJust nodes
+findAdjacentNodes n g@Graph {directed=Directed} = sortBy compareLabels (map fromJust nodes)
   where
     adjacentEdges = findDirectedEdgesSingleLabel (nodeToLabel n) g
     adjacentLabels = map (\(_, endNode, _, _) -> endNode) adjacentEdges
     nodes = map (flip findNode g) adjacentLabels
-findAdjacentNodes n g@Graph{directed=Undirected} = map fromJust (nodes)
+findAdjacentNodes n g@Graph{directed=Undirected} = sortBy compareLabels (map fromJust (nodes))
   where
     adjacentEdges = findEdgesSingleLabel (nodeToLabel n) g
     beginLabels = map (\(beginLabel, _, _, _) -> beginLabel) adjacentEdges
     endLabels = map (\(_, endLabel, _, _) -> endLabel) adjacentEdges
     adjacentLabels = filter (/= nodeToLabel n) (beginLabels ++ endLabels)
     nodes = map (flip findNode g) adjacentLabels
+
+compareLabels :: Node -> Node -> Ordering
+compareLabels a b = nodeToLabel a `compare` nodeToLabel b
 
 isComplete :: Graph -> Bool
 isComplete g@Graph{nodes=nodes} = and (map (flip isCompleteNode g) nodes)
