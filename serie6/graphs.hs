@@ -573,16 +573,16 @@ findPaths :: Node -> Node -> Graph -> [[Edge]]
 findPaths x y g | x == y = [[]]
             | otherwise = [edge:path | t <- adjacentNodes, let edge = fromJust (findEdge (nodeToLabel x) (nodeToLabel t) g), path <- findPaths t y g]
               where
-                  adjacentNodes = findAdjacentNodes x g
+                adjacentNodes = findAdjacentNodes x g
 
 findShortestPath :: Node -> Node -> Graph -> [Edge]
 findShortestPath a b g = findShortestPath' (findPaths a b g)
 
 findShortestPath' :: [[Edge]] -> [Edge]
 findShortestPath' (e:es) | lengthPath e == lengthShortestPath = e
-                       | otherwise = findShortestPath' es
-                         where
-                          lengthShortestPath = minimum (lengthPaths (e:es))
+                         | otherwise = findShortestPath' es
+                           where
+                             lengthShortestPath = minimum (lengthPaths (e:es))
 
 lengthPaths :: [[Edge]] -> [Int]
 lengthPaths [] = []
