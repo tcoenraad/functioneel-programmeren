@@ -293,7 +293,7 @@ eventloop s@(Store pn pr pe pd pw pf pq pz px pc pp ps n1s n2s g) (MouseUp MLeft
                                                                                          (output4, graph4) = deleteEdge (fromJust n1s) (fromJust node) g
                                                                                          (output5, graph5) = recolorNode (fromJust node) Red g
                                                                                          (output6, graph6) = colorAdjacentNodes (fromJust node) Blue g
-                                                                                         (output7, graph7) = colorAllNodes Black g
+                                                                                         (output7, graph7) = colorAllNodesAndEdges Black g 
                                                                                          (output8, graph8) = colorAllSubgraphsRandomly g [Blue, Red, Orange, Black]
                                                                                          (output9, graph9) = colorAllPathsRandomly (fromJust n1s) (fromJust node) g [Blue, Red, Orange, Black]
                                                                                          (output10, graph10) = colorShortestPath (fromJust n1s) (fromJust node) g Purple
@@ -406,6 +406,16 @@ colorAdjacentNodes n c g = colorNodes (findAdjacentNodes n g) c g
 -- | Kleurt alle nodes
 colorAllNodes :: ColorG -> Graph -> ([GraphOutput], Graph)
 colorAllNodes c g@Graph {nodes=nodes} = colorNodes nodes c g
+
+-- | Kleurt alle edges
+colorAllEdges :: ColorG -> Graph -> ([GraphOutput], Graph)
+colorAllEdges c g@Graph {edges=edges} = colorEdges edges c g
+
+colorAllNodesAndEdges :: ColorG -> Graph -> ([GraphOutput], Graph)
+colorAllNodesAndEdges c g = (graphToOutput g'', g'') 
+  where 
+    (graphOutPut, g') = colorAllNodes c g
+    (graphOutput, g'') = colorAllEdges c g'
 
 -- | Kleurt alle subgrafen willekeurig
 colorAllSubgraphsRandomly :: Graph -> [ColorG] -> ([GraphOutput], Graph)
