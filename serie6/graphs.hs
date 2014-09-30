@@ -2,7 +2,7 @@ import FPPrac
 import FPPrac.Graphs
 import Data.Maybe
 import Data.Char (isDigit)
-import Data.List ((\\), delete, findIndex)
+import Data.List ((\\), delete)
     
 
 -- | Store datatype
@@ -433,10 +433,10 @@ colorNodes ns c g = (coloredNodesOutput, g')
 
 -- | Kleurt alle paden van a naar b willekeurig
 colorAllPathsRandomly :: Node -> Node -> Graph -> [ColorG] -> ([GraphOutput], Graph)
-colorAllPathsRandomly a b g c = colorListsOfEdges (paths a b g) c g
+colorAllPathsRandomly a b g c = colorListsOfEdges (findPaths a b g) c g
 
 colorShortestPath :: Node -> Node -> Graph -> ColorG -> ([GraphOutput], Graph)
-colorShortestPath a b g c = (graphToOutput (colorEdgesInGraph (calculatePaths a b g) c g), g)
+colorShortestPath a b g c = (graphToOutput (colorEdgesInGraph (findShortestPath a b g) c g), g)
 
 colorEdges :: [Edge] -> ColorG -> Graph -> ([GraphOutput], Graph)
 colorEdges es c g = (coloredEdgesOutput, g')
@@ -472,9 +472,6 @@ colorListsOfEdges' (e:es) (c:cs) g = [(coloredEdgesOutput, g')] ++ colorListsOfE
 
 nodeToLabel :: Node -> Label
 nodeToLabel (l, _, _) = l
-
-edgeToLabel :: Edge -> Label
-edgeToLabel (l, _, _, _) = l
 
 colorNodeInGraph :: Node -> ColorG -> Graph -> Graph
 colorNodeInGraph (l, p, _) c g = g''
@@ -545,53 +542,18 @@ findSubgraphs' visitedNodes remainingNodes g = [subgraph] ++ findSubgraphs' visi
 isReachable :: Node -> Node -> Graph -> Bool
 isReachable a b g = elem b (findSubgraph a g)
 
-paths :: Node -> Node -> Graph -> [[Edge]]
-paths a b g  | all (<=1) lengths == True = [path a b g] 
-             | otherwise = [path a b g] ++ paths a b g'
-                where
-                  nodes =  findSubgraph a g                  
-                  lengths = map length (map ((flip findAdjacentNodes) g) nodes)
-                  edges = findEdges nodes g
-                  nodeDoubleEd = nodeDoubleEdge edges g
-                  (l1, l2) = findLabelsEdge nodeDoubleEd
-                  g' =  removeEdge l1 l2 g
+findPaths :: Node -> Node -> Graph -> [[Edge]]
+findPaths x y g | x == y = [[]]
+            | otherwise = [edge:path | t <- adjacentNodes, let edge = fromJust (findEdge (nodeToLabel x) (nodeToLabel t) g), path <- findPaths t y g]
+              where
+                  adjacentNodes = findAdjacentNodes x g
 
-findEdges :: [Node] -> Graph -> [Edge]
-findEdges [] g = []
-findEdges (n:ns) g = findEdges' (nodeToLabel n) (map nodeToLabel ns) g ++ findEdges ns g
+findShortestPath :: Node -> Node -> Graph -> [Edge]
+findShortestPath a b g = findShortestPath' (findPaths a b g)
 
-findEdges' :: Label -> [Label] -> Graph -> [Edge]
-findEdges' l1 [] g = []
-findEdges' l1 (l:ls) g | findEdge l1 l g /= Nothing = [fromJust (findEdge l1 l g)] ++ findEdges' l1 ls g
-                       | otherwise = [] ++ findEdges' l1 ls g
-
-nodeDoubleEdge :: [Edge] -> Graph -> Edge
-nodeDoubleEdge [] g = error "geen node met meerder edges"
-nodeDoubleEdge (e:es) g | edgeToLabel e == edgeToLabel (head es) = e
-                        | otherwise = nodeDoubleEdge es g
-
-findLabelsEdge :: Edge -> (Label, Label)
-findLabelsEdge (l1, l2, _, _) = (l1, l2)
-
-removeEdges :: [Label] -> Graph -> Graph
-removeEdges [l] g = g
-removeEdges (l:ls) g = removeEdges ls (removeEdge l (head ls) g)
-
-path :: Node -> Node -> Graph -> [Edge]
-path a b g | head (findAdjacentNodes a g)==b = findDirectedEdgesSingleLabel (nodeToLabel a) g
-           | isReachable n b g == False = path a (head ns) g 
-           | otherwise = [head a'] ++ path n b g
-             where 
-              (n:ns) = findAdjacentNodes a g
-              a' = findDirectedEdgesSingleLabel (nodeToLabel a) g
-              n' = findDirectedEdgesSingleLabel (nodeToLabel n) g 
-
-calculatePaths :: Node -> Node -> Graph -> [Edge]
-calculatePaths a b g = calculatePaths' (paths a b g)
-
-calculatePaths' :: [[Edge]] -> [Edge]
-calculatePaths' (e:es) | lengthPath e == lengthShortestPath = e
-                       | otherwise = calculatePaths' es
+findShortestPath' :: [[Edge]] -> [Edge]
+findShortestPath' (e:es) | lengthPath e == lengthShortestPath = e
+                       | otherwise = findShortestPath' es
                          where
                           lengthShortestPath = minimum (lengthPaths (e:es))
 
