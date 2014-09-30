@@ -64,7 +64,7 @@ instructions = Instructions [ "Instructions",
                               "Press 'z', click on a node to color all adjacent nodes blue",
                               "Press 'x' and click on the screen to reset everything",
                               "Press 'c' and click on the screen to color all subgraphs",
-                              "Press 'p', click on two nodes to color the path between the nodes",
+                              "Press 'p', click on two nodes to color a path between the nodes, repeat to cycle",
                               "Press 's', click on two nodes to color the shortest path between the nodes"
                             ]                             
 
@@ -450,10 +450,10 @@ colorAllPathsOneByOne a b g c = colorAllPathsOneByOne' paths (length paths) g c
 colorAllPathsOneByOne' :: [[Edge]] -> Number -> Graph -> ColorG -> ([GraphOutput], Graph)
 colorAllPathsOneByOne' [] n g c = (graphToOutput g, g)
 colorAllPathsOneByOne' (p:ps) n g c | n /= -1 && isColorOfPath p c /= True = colorAllPathsOneByOne' (ps++[p]) (n-1) g c
-                                    | otherwise = (graphToOutput g1', g1')
-                                     where
-                                       g1 = colorEdgesInGraph p Black g
-                                       g1' = colorEdgesInGraph (head ps) c g1
+                                    | otherwise = (graphToOutput g'', g'')
+                                    where
+                                      g' = colorEdgesInGraph p Black g
+                                      g'' = colorEdgesInGraph (head ps) c g'
     
 isColorOfPath :: [Edge] -> ColorG -> Bool
 isColorOfPath [p] c = colorOfEdge p == c
@@ -466,10 +466,8 @@ colorShortestPath :: Node -> Node -> Graph -> ColorG -> ([GraphOutput], Graph)
 colorShortestPath a b g c = (graphToOutput (colorEdgesInGraph (findShortestPath a b g) c g), g)
 
 colorEdges :: [Edge] -> ColorG -> Graph -> ([GraphOutput], Graph)
-colorEdges es c g = (coloredEdgesOutput, g')
+colorEdges es c g = (graphToOutput g', g')
   where
-    coloredEdges = map (\(l1, l2, _, w) -> (l1, l2, c, w)) es
-    coloredEdgesOutput = map (edgeToOutput g') coloredEdges
     g' = colorEdgesInGraph es c g
 
 colorEdgeInGraph :: Edge -> ColorG -> Graph -> Graph
@@ -485,15 +483,13 @@ colorEdgesInGraph (e:es) c g = (colorEdgesInGraph es c g')
     g' = (colorEdgeInGraph e c g)
 
 colorListsOfEdges :: [[Edge]] -> [ColorG] -> Graph -> ([GraphOutput], Graph)
-colorListsOfEdges e c g = (coloredEdgesOutput, g')
+colorListsOfEdges e c g = (graphToOutput g', g')
   where
-    output = (colorListsOfEdges' e c g)
-    coloredEdgesOutput = concat (map fst output)
-    g' = snd (last output)
+    g' = (colorListsOfEdges' e c g)
 
-colorListsOfEdges' :: [[Edge]] -> [ColorG] -> Graph -> [([GraphOutput], Graph)]
-colorListsOfEdges' [] (c:cs) g = [([], g)]
-colorListsOfEdges' (e:es) (c:cs) g = [(coloredEdgesOutput, g')] ++ colorListsOfEdges' es (cs ++ [c]) g'
+colorListsOfEdges' :: [[Edge]] -> [ColorG] -> Graph -> Graph
+colorListsOfEdges' [] (c:cs) g = g
+colorListsOfEdges' (e:es) (c:cs) g = colorListsOfEdges' es (cs ++ [c]) g'
   where
     (coloredEdgesOutput, g') = colorEdges e c g
 
