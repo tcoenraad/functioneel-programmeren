@@ -570,6 +570,7 @@ findSubgraphs' visitedNodes remainingNodes g = [subgraph] ++ findSubgraphs' visi
 isReachable :: Node -> Node -> Graph -> Bool
 isReachable a b g = elem b (findSubgraph a g)
 
+-- http://stackoverflow.com/questions/11168238/haskell-generating-all-paths-between-nodes
 findPaths :: Node -> Node -> Graph -> [[Edge]]
 findPaths x y g | x == y = [[]]
             | otherwise = [edge:path | t <- adjacentNodes, let edge = fromJust (findEdge (nodeToLabel x) (nodeToLabel t) g), path <- findPaths t y g]
@@ -590,7 +591,7 @@ lengthPaths [] = []
 lengthPaths (p:ps) =  [lengthPath p] ++ lengthPaths ps
 
 weightOfEdge :: Edge -> Int
-weightOfEdge (l1, l2, c, w) = w
+weightOfEdge (_, _, _, w) = w
 
 lengthPath :: [Edge] -> Int
 lengthPath [] = 0
