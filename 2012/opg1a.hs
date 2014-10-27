@@ -1,0 +1,6 @@
+perfect :: Int -> Bool
+perfect n = sum (delers n) == n
+
+delers :: Int -> [Int]
+delers n = [x | x <- [1..n-1], n `mod` x == 0]
+
