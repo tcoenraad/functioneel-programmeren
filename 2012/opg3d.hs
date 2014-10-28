@@ -20,4 +20,3 @@ bevatCycle g = any duplicates (map ((flip bereikbaar) g) (allNodes g))
 allNodes :: Graph -> [Node]
 allNodes [] = []
 allNodes ((n,_):g) = [n] ++ (allNodes g)
-
