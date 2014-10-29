@@ -1,8 +1,13 @@
+import Data.List
+
 type Node = Int
 type Graph = [(Node, [Node])]
 
 bereikbaar :: Node -> Graph -> [Node]
-bereikbaar n g = concat [y : (bereikbaar y g) | y <- findNodes n g]
+bereikbaar n g = bereikbaar' n g []
+
+bereikbaar' :: Node -> Graph -> [Node] -> [Node]
+bereikbaar' n g vns = concat [y : (bereikbaar' y g (y:vns)) | y <- (findNodes n g) \\ vns]
 
 findNodes :: Node -> Graph -> [Node]
 findNodes _ [] = []
@@ -15,7 +20,7 @@ duplicates (n:ns) | n `elem` ns = True
                   | otherwise = duplicates ns
 
 bevatCycle :: Graph -> Bool
-bevatCycle g = any duplicates (map ((flip bereikbaar) g) (allNodes g))
+bevatCycle g = or (map (\n -> n `elem` (bereikbaar n g)) (allNodes g))
 
 allNodes :: Graph -> [Node]
 allNodes [] = []

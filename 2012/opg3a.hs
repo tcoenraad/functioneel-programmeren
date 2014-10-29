@@ -1,8 +1,13 @@
+import Data.List
+
 type Node = Int
 type Graph = [(Node, [Node])]
 
 bereikbaar :: Node -> Graph -> [Node]
-bereikbaar n g = concat [y : (bereikbaar y g) | y <- findNodes n g]
+bereikbaar n g = bereikbaar' n g []
+
+bereikbaar' :: Node -> Graph -> [Node] -> [Node]
+bereikbaar' n g vns = concat [y : (bereikbaar' y g (y:vns)) | y <- (findNodes n g) \\ vns]
 
 findNodes :: Node -> Graph -> [Node]
 findNodes _ [] = []
