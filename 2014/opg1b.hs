@@ -1,6 +1,8 @@
 money :: Int -> [[Int]]
+money 0 = [[]]
 money n = [(k:rest) | k <- [1,2,5,10,20,50],
-                      (n - k) >= 0,
-                      rest <- []:(money (n - k)),
-                      if not (null rest) then k <= head rest else True,
-                      (k + sum rest) == n]
+                      k <= n,
+                      rest <- (money (n - k)),
+                      k <= minimum (n:rest), -- ordering does not matter
+                      n == sum (k:rest)
+                      ]
