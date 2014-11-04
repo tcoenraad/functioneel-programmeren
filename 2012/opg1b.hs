@@ -1,3 +1,5 @@
+module Exercise where
+
 jollyJumper :: [Int] -> Bool
 jollyJumper n = jollyJumper' ((length n) - 1) n
 
