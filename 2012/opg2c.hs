@@ -1,3 +1,5 @@
+module Exercise where
+
 data OA = Add | Mul deriving Show
 data OB = EQu | GTh | LTh deriving Show
 data ExprA = Const Int

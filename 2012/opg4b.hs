@@ -1,11 +1,13 @@
+module Exercise where
+
 data Tree = Node Int [Tree] | Leaf Int deriving Show
 
 vervangDoorMax :: Tree -> Tree
 vervangDoorMax t = changeValues (findMax t) t
 
 changeValues :: Int -> Tree -> Tree
-changeValues x (Node v ts) = Node x (map (changeValues x) ts)
-changeValues x (Leaf v) = Leaf x
+changeValues x (Node _ ts) = Node x (map (changeValues x) ts)
+changeValues x (Leaf _) = Leaf x
 
 findMax :: Tree -> Int
 findMax t = maximum $ allValues t

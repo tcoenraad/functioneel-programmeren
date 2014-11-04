@@ -1,3 +1,5 @@
+module Exercise where
+
 data OA = Add | Mul
 data OB = EQu | GTh | LTh
 data ExprA = Const Int

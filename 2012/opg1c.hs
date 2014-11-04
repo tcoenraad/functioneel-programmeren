@@ -1,5 +1,6 @@
+module Exercise where
+
 import Data.List
-import Debug.Trace
 
 -- recursive
 matrixMultiplying :: [[Int]] -> [[Int]] -> [[Int]]

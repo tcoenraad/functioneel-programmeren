@@ -1,3 +1,5 @@
+module Exercise where
+
 data Graph = Graph{nodes :: [Node], edges :: [Edge]} deriving Show
 type Node = Int
 type Edge = (Int, Int)

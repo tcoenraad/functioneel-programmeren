@@ -1,3 +1,5 @@
+module Exercise where
+
 perfect :: Int -> Bool
 perfect n = sum (delers n) == n
 

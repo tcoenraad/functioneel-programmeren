@@ -1,18 +1,20 @@
+module Exercise where
+
 type Node = Int
 type Graph = [(Node, [Node])]
 
-findNodes :: Node -> Graph -> [Node]
-findNodes _ [] = []
-findNodes n ((a, b):graph) | n == a = b
-                           | otherwise = findNodes n graph
+adjacentNodes :: Node -> Graph -> [Node]
+adjacentNodes _ [] = []
+adjacentNodes n ((a, b):graph) | n == a = b
+                               | otherwise = adjacentNodes n graph
 
 isCycle :: [Node] -> Graph -> Bool
-isCycle nodes@(n:ns) g | duplicates nodes = False
-                       | otherwise = isCycle' (nodes ++ [n]) g
+isCycle nodes@(n:_) g | duplicates nodes = False -- node may only occur once
+                      | otherwise = isCycle' (nodes ++ [n]) g
 
 isCycle' :: [Node] -> Graph -> Bool
 isCycle' [_] _ = True
-isCycle' (n:m:ns) g | m `elem` (findNodes n g) = isCycle' (m:ns) g
+isCycle' (n:m:ns) g | m `elem` (adjacentNodes n g) = isCycle' (m:ns) g
                     | otherwise = False
 
 duplicates :: [Node] -> Bool

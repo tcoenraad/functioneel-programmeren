@@ -1,7 +1,9 @@
+module Exercise where
+
 data Tree = Node Int Tree Tree | Leaf Int
 
 histogram :: Tree -> [(Int, Int)]
-histogram t = filter (\(a, n) -> n /= 0) (histogram' t)
+histogram t = filter (\(_, n) -> n /= 0) (histogram' t)
 
 histogram' :: Tree -> [(Int, Int)]
 histogram' t = [(a, count t a) | a <- [zoekMin t..zoekMax t]] where

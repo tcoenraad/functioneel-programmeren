@@ -1,3 +1,5 @@
+module Exercise where
+
 import Data.List
 
 type Node = Int
@@ -7,9 +9,9 @@ bereikbaar :: Node -> Graph -> [Node]
 bereikbaar n g = bereikbaar' n g []
 
 bereikbaar' :: Node -> Graph -> [Node] -> [Node]
-bereikbaar' n g vns = concat [y : (bereikbaar' y g (y:vns)) | y <- (findNodes n g) \\ vns]
+bereikbaar' n g vns = concat [y : (bereikbaar' y g (y:vns)) | y <- (adjacentNodes n g) \\ vns]
 
-findNodes :: Node -> Graph -> [Node]
-findNodes _ [] = []
-findNodes n ((a, b):graph) | n == a = b
-                           | otherwise = findNodes n graph
+adjacentNodes :: Node -> Graph -> [Node]
+adjacentNodes _ [] = []
+adjacentNodes n ((a, b):graph) | n == a = b
+                          | otherwise = adjacentNodes n graph

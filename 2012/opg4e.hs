@@ -1,8 +1,10 @@
+module Exercise where
+
 data Tree = Node Int [Tree] | Leaf Int deriving Show
 data PairTree = PairNode (Int, Int) [PairTree] | PairLeaf Int deriving Show
 
 vervangDoorPaar :: Tree -> PairTree
-vervangDoorPaar tree@(Node v ts) = PairNode (som tree, diepte tree) (map vervangDoorPaar ts)
+vervangDoorPaar tree@(Node _ ts) = PairNode (som tree, diepte tree) (map vervangDoorPaar ts)
 vervangDoorPaar (Leaf v) = PairLeaf v
 
 findMax :: Tree -> Int

@@ -1,3 +1,5 @@
+module Exercise where
+
 pascal :: Int -> [[Int]]
 pascal n = [(pascal' k) | k <- [0..n]] 
 
