@@ -15,7 +15,7 @@ calcRow :: [Int] -> [[Int]] -> [Int]
 calcRow _ [] = []
 calcRow a (b:bs) = sum (zipWith (*) a b) : calcRow a bs
 
--- higher order
+-- higher-order
 matrixMultiply :: [[Int]] -> [[Int]] -> [[Int]]
 matrixMultiply as bs = map (\a -> map (\b -> sum (zipWith (*) a b)) (transpose bs)) as
 
