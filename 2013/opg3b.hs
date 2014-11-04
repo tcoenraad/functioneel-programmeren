@@ -13,10 +13,10 @@ median t = s !! (((length s) `quot` 2) - 1) where
   s = sort (allValues t)
 
 minstensMed :: Tree -> Tree
-minstensMed t = minstensMed' t (median t)
+minstensMed t = minstensMed' (median t) t
 
-minstensMed' :: Tree -> Int -> Tree
-minstensMed' (Node i ts) m | i < m = Node 0 (map ((flip minstensMed') m) ts)
-                           | otherwise = Node i (map ((flip minstensMed') m) ts)
-minstensMed' (Leaf i) m | i < m = Leaf 0
+minstensMed' :: Int -> Tree -> Tree
+minstensMed' m (Node i ts) | i < m = Node 0 $ map (minstensMed' m) ts
+                           | otherwise = Node i $ map (minstensMed' m) ts
+minstensMed' m (Leaf i) | i < m = Leaf 0
                         | otherwise = Leaf i
