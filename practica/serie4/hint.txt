@@ -1,5 +1,0 @@
-parse E (x:xs) | x == '(' = (BinTree t1 t3)
-				where 
-				(t1,r1) = parse E xs
-				((BinNode op _ _),r2) = parse O r1
-				(t3,r3) = parse E r2
