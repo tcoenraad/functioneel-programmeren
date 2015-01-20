@@ -11,4 +11,4 @@ add ks n = sum $ filter (\x -> any (\y -> x `mod` y == 0) ks) [0..n-1]
 
 -- alternative
 add' :: [Int] -> Int -> Int
-add' ks n = sum [n | n <- [0..n-1], any (\k -> n`mod`k == 0) ks]
+add' ks n = sum [n | n <- [0..n-1], any (\k -> n `mod` k == 0) ks]
